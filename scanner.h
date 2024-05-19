@@ -11,7 +11,7 @@
 class Scanner {
     private:
         std::string source;
-        std::vector<Token> tokens;
+        std::vector<Token *> tokens;
         int start;
         int current;
         int line;
@@ -48,6 +48,6 @@ class Scanner {
     public:
         Scanner(std::string source);
 
-        std::vector<Token> scanTokens();
+        std::vector<Token *> scanTokens();
 };
 #endif
