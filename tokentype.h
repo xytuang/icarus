@@ -19,6 +19,6 @@ enum TokenType {
   PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
   END_OF_FILE
-}
+};
 
 #endif

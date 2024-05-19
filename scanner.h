@@ -1,24 +1,53 @@
 #ifndef SCANNER_H
 #define SCANNER_H
+
 #include <string>
 #include <vector>
 #include <unordered_map>
+
 #include "tokentype.h"
 #include "token.h"
 
 class Scanner {
     private:
-        const std::string source;
-        const std::vector<Token> tokens;
+        std::string source;
+        std::vector<Token> tokens;
         int start;
         int current;
         int line;
+        std::unordered_map<std::string, TokenType> keywords;
+
+        bool isAtEnd();
+
+        bool isDigit(char c);
+
+        bool isAlpha(char c);
+
+        bool isAlphaNumeric(char c);
+
+        char  advance();
+
+        void addToken(TokenType type, std::string literal);
+
+        void addToken(TokenType type);
+
+        char peek();
+
+        char peekNext();
+
+        bool match(char expected);
+
+        void parseString();
+
+        void parseNumber();
+
+        void identifier();
+
+        void scanToken();
+
     public:
-        Scanner(std::string source) {}
+        Scanner(std::string source);
 
-        bool isAtEnd() {}
-
-        std::vector<Token> scanTokens() {}
-
+        std::vector<Token> scanTokens();
 };
 #endif

@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++0x -Wall -pedantic-errors -g
 
-SRCS = icarus.cpp errors.cpp token.cpp scanner.cpp
+SRCS = icarus.cpp token.cpp scanner.cpp
 OBJS = ${SRCS:.cpp=.o}
 HEADERS = 
 
