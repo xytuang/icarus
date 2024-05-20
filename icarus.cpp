@@ -4,7 +4,14 @@
 #include <iterator>
 #include <sstream>
 
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
 #include <stdlib.h>
+#include <unistd.h>
+
+#include "scanner.h"
+#include "token.h"
 
 bool hadError = false;
 
@@ -18,11 +25,24 @@ std::vector<std::string> splitString(const std::string str, char delimiter) {
     }
     return tokens;
 }
+void handler(int sig) {
+    void *array[10];
+    size_t size;
 
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 10);
+
+    // print out all the frames to stderr
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    exit(1);
+}
 void run(std::string source){
-    std::vector<std::string> tokens = splitString(source, ' ');
-    for (std::string str : tokens) {
-        std::cout << str << std::endl;
+    Scanner *scanner = new Scanner(source);
+    std::vector<Token *> tokens = scanner->scanTokens();
+
+    for (Token * token : tokens) {
+        std::cout << *token << std::endl;
     }
 }
 
@@ -55,6 +75,7 @@ void runPrompt(){
 }
 
 int main(int argc, char** argv){
+    signal(SIGSEGV, handler);
     if (argc > 2) {
         std::cout << "Usage: icarus [script]" << std::endl;
         exit(1);
