@@ -33,6 +33,23 @@ std::vector<std::string> splitString(const std::string str, char delimiter) {
 }
 
 
+void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std::string> types) {
+    outFile << "template typename<R>" << std::endl;
+    outFile << "class Visitor {" << std::endl;
+    outFile << "public:" << std::endl;
+    for (int i = 0; i < types.size(); i++) {
+        std::string typeName = trim(splitString(types[i], ':')[0]); //first split on ':', get the first element of split, which is the typeName, then trim it
+        std::string baseLower = baseName;
+        for (int i = 0; i < baseLower.size(); i++) {
+            baseLower[i] = tolower(baseLower[i]);
+        }
+        outFile << "    virtual R visit" << typeName << baseName << " (" << typeName << "& " << baseLower << ") = 0;" << std::endl;
+    }
+    outFile << "    virtual ~Visitor() = default;" << std::endl;
+    outFile << "};" << std::endl;
+    outFile << std::endl;
+}
+
 void defineType(std::ofstream& outFile, std::string baseName, std::string className, std::string fields) {
     outFile << "class " << className << " : public " << baseName << " {" << std::endl;
     outFile << "public:" << std::endl;
@@ -49,6 +66,10 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
         outFile << "        this->" << name << "=" << name << ";" << std::endl;   
     }
     outFile << "    }" << std::endl;
+    outFile << "    template<typename R>" << std::endl;
+    outFile << "    R accept(Visitor<R>& visitor) override {" << std::endl;
+    outFile << "        return visitor->visit" << className << baseName << "(this);" << std::endl;
+    outFile << "    }" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
 
@@ -63,11 +84,23 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
     }
 
     outFile << "#include <vector>" << std::endl;
+    outFile << "#include <string>" << std::endl;
+    outFile << "#include \"token.h\"" << std::endl;
+    outFile << "using namespace std;" << std::endl;
     outFile << std::endl;
-    outFile << "class " << baseName << "{" << std::endl;
 
+    //writing Visitor class
+    defineVisitor(outFile, baseName, types);
+
+    // writing Expr class
+    outFile << "template typename<R>" << std::endl;
+    outFile << "class " << baseName << "{" << std::endl;
+    outFile << "public:" << std::endl;
+    outFile << "    virtual R accept(Visitor<R>& visitor) = 0;" << std::endl;
     outFile << "};" << std::endl;
-    
+    outFile << std::endl;
+
+    // writing child classes (assign, binary etc.)
     for (std::string type: types ) {
         std::vector<std::string> processed = splitString(type, ':');
         std::string className = trim(processed[0]);
@@ -75,14 +108,13 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
         defineType(outFile, baseName, className, fields);
     }
     outFile.close();
-
 }
 
 int main() {
     std::string outputDir = "..";
     std::vector<std::string> types = {"Binary   : Expr left, Token operator, Expr right",
       "Grouping : Expr expression",
-      "Literal  : Object value",
+      "Literal  : string value",
       "Unary    : Token operator, Expr right"};
     defineAst(outputDir, "Expr", types);
 }
