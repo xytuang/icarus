@@ -4,31 +4,14 @@
 #include <iterator>
 #include <sstream>
 
-#include <stdio.h>
-#include <execinfo.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
-
+#include "icarus.h"
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
 
-bool hadError = false;
+bool Icarus::hadError = false;
 
-void handler(int sig) {
-    void *array[10];
-    size_t size;
-
-    // get void*'s for all entries on the stack
-    size = backtrace(array, 10);
-
-    // print out all the frames to stderr
-    fprintf(stderr, "Error: signal %d:\n", sig);
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
-    exit(1);
-}
-void run(std::string source){
+void Icarus::run(std::string source){
     Scanner *scanner = new Scanner(source);
     std::vector<Token *> tokens = scanner->scanTokens();
     Parser* parser = new Parser(tokens);
@@ -40,8 +23,7 @@ void run(std::string source){
 
 }
 
-
-void runFile(char *filename) {
+void Icarus::runFile(char *filename) {
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
         std::cerr << "Unable to open file: " << filename << std::endl;
@@ -56,7 +38,7 @@ void runFile(char *filename) {
 }
 
 
-void runPrompt(){
+void Icarus::runPrompt(){
     std::string line;
     while(true) {
         std::cout << "> ";
@@ -68,16 +50,19 @@ void runPrompt(){
     }
 }
 
-int main(int argc, char** argv){
-    signal(SIGSEGV, handler);
-    if (argc > 2) {
-        std::cout << "Usage: icarus [script]" << std::endl;
-        exit(1);
-    }
-    else if (argc == 2) {
-        runFile(argv[1]);
+void Icarus::report(int line, std::string where, std::string message) {
+    std::cerr << "[line " << line << "] Error" << where << ": " << message << std::endl;
+    hadError = true;
+}
+
+void Icarus::error(Token* token, std::string message){
+    if (token->getType() == END_OF_FILE){
+        report(token->getLine(), " at end ",  message);
     }
     else {
-        runPrompt();
+        report(token->getLine(), " at \'" + std::to_string(token->getLine()) + "\'", message);
     }
+}
+void Icarus::error(int line, std::string message){
+    report(line, "", message);
 }

@@ -8,8 +8,12 @@
 #include <exception>
 
 class Parser {
-    private:
+    public:
         class ParseError : public std::exception {};
+        Parser(std::vector<Token*> tokens);
+        Expr* parse();
+
+    private:
         std::vector<Token *> tokens;
         int current;
 
@@ -35,9 +39,6 @@ class Parser {
         Expr* equality();
         Expr* expression();
 
-    public:
-        Parser(std::vector<Token*> tokens);
-        Expr* parse();
 
 };
 

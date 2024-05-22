@@ -19,3 +19,7 @@ std::string Token::getLexeme() {
 int Token::getLine(){
     return this->line;
 }
+
+TokenType Token::getType() {
+    return this->type;
+}

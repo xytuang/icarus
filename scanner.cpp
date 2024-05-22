@@ -1,6 +1,5 @@
 #include "scanner.h"
-#include "errors.h"
-
+#include "icarus.h"
 
 bool Scanner::isAtEnd() {
     return this->current >= this->source.size();
@@ -56,7 +55,7 @@ void Scanner::parseString() {
         advance();
     }
     if (isAtEnd()) {
-        error(line, "Unterminated String");
+        Icarus::error(line, "Unterminated String");
         return;
     }
     advance();
@@ -129,7 +128,7 @@ void Scanner::scanToken(){
                 identifier();
             }
             else {
-                error(line, "Unexpected character."); break;
+                Icarus::error(line, "Unexpected character."); break;
             }
             break;
     }

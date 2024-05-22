@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "token.h"
 #include "expr.h"
+#include "icarus.h"
 
 Parser::Parser(std::vector<Token*> tokens){
     this->tokens = tokens;
@@ -36,9 +37,9 @@ bool Parser::check(TokenType type) {
     return peek()->getType() == type;
 }
 
-ParseError* Parser::error(Token* token, std::string message) {
+Parser::ParseError* Parser::error(Token* token, std::string message) {
     Icarus::error(token, message);
-    return new ParseError();
+    return new Parser::ParseError();
 }
 
 
@@ -153,7 +154,7 @@ Expr* Parser::expression() {
 Expr* Parser::parse() {
     try {
         return expression();
-    } catch (ParseError error) {
+    } catch (Parser::ParseError error) {
         return nullptr;
     }
 }

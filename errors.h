@@ -12,7 +12,7 @@ void report(int line, std::string where, std::string message) {
     hadError = true;
 }
 
-void error(Token* token, std::string message){
+static void error(Token* token, std::string message){
     if (token->getType() == END_OF_FILE){
         report(token->getLine(), " at end ",  message);
     }
@@ -21,9 +21,5 @@ void error(Token* token, std::string message){
     }
 }
 
-void error(int line, std::string message){
-
-    report(line, "", message);
-}
 
 #endif
