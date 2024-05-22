@@ -34,19 +34,18 @@ std::vector<std::string> splitString(const std::string str, char delimiter) {
 
 
 void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std::string> types) {
-    outFile << "template typename<R>" << std::endl;
-    outFile << "class Visitor {" << std::endl;
-    outFile << "public:" << std::endl;
+    outFile << "    class Visitor {" << std::endl;
+    outFile << "    public:" << std::endl;
     for (int i = 0; i < types.size(); i++) {
         std::string typeName = trim(splitString(types[i], ':')[0]); //first split on ':', get the first element of split, which is the typeName, then trim it
         std::string baseLower = baseName;
         for (int i = 0; i < baseLower.size(); i++) {
             baseLower[i] = tolower(baseLower[i]);
         }
-        outFile << "    virtual R visit" << typeName << baseName << " (" << typeName << "& " << baseLower << ") = 0;" << std::endl;
+        outFile << "        virtual string visit" << typeName << baseName << " (" << typeName << "* " << baseLower << ") = 0;" << std::endl;
     }
-    outFile << "    virtual ~Visitor() = default;" << std::endl;
-    outFile << "};" << std::endl;
+    outFile << "        virtual ~Visitor() = default;" << std::endl;
+    outFile << "    };" << std::endl;
     outFile << std::endl;
 }
 
@@ -66,9 +65,8 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
         outFile << "        this->" << name << "=" << name << ";" << std::endl;   
     }
     outFile << "    }" << std::endl;
-    outFile << "    template<typename R>" << std::endl;
-    outFile << "    R accept(Visitor<R>& visitor) override {" << std::endl;
-    outFile << "        return visitor->visit" << className << baseName << "(this);" << std::endl;
+    outFile << "    string accept(Visitor& visitor) {" << std::endl;
+    outFile << "        return visitor.visit" << className << baseName << "(this);" << std::endl;
     outFile << "    }" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
@@ -76,7 +74,7 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
 }
 
 void defineAst(std::string outputDir, std::string baseName, std::vector<std::string> types) {
-    std::string path = outputDir + "/expr.cpp";
+    std::string path = outputDir + "/expr.h";
     std::ofstream outFile(path);
     if (!outFile) {
         std::cerr << "Error opening file for writing!" << std::endl;
@@ -89,14 +87,20 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
     outFile << "using namespace std;" << std::endl;
     outFile << std::endl;
 
-    //writing Visitor class
-    defineVisitor(outFile, baseName, types);
+     
+    for (std::string type: types ) {
+        std::vector<std::string> processed = splitString(type, ':');
+        std::string className = trim(processed[0]);
+        outFile << "class " << className << ";" << std::endl;
+    }
+
+    outFile << std::endl;
 
     // writing Expr class
-    outFile << "template typename<R>" << std::endl;
     outFile << "class " << baseName << "{" << std::endl;
     outFile << "public:" << std::endl;
-    outFile << "    virtual R accept(Visitor<R>& visitor) = 0;" << std::endl;
+    defineVisitor(outFile, baseName, types);
+    //outFile << "    string accept(Visitor& visitor) {return \"\";}" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
 
@@ -107,14 +111,15 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
         std::string fields = trim(processed[1]);
         defineType(outFile, baseName, className, fields);
     }
+
     outFile.close();
 }
 
 int main() {
     std::string outputDir = "..";
-    std::vector<std::string> types = {"Binary   : Expr left, Token operator, Expr right",
+    std::vector<std::string> types = {"Binary   : Expr left, Token* operation, Expr right",
       "Grouping : Expr expression",
       "Literal  : string value",
-      "Unary    : Token operator, Expr right"};
+      "Unary    : Token* operation, Expr right"};
     defineAst(outputDir, "Expr", types);
 }

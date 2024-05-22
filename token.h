@@ -19,6 +19,14 @@ class Token {
             return os;
         }
 
+        TokenType getType();
+
+        std::string getLexeme();
+
+        std::string getLiteral();
+
+        int getLine();
+
 };
 
 #endif
