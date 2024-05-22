@@ -19,31 +19,32 @@ public:
         virtual ~Visitor() = default;
     };
 
+    virtual string accept(Visitor* visitor) = 0;
 };
 
 class Binary : public Expr {
 public:
-    Expr left;
+    Expr* left;
     Token* operation;
-    Expr right;
-    Binary(Expr left, Token* operation, Expr right) {
+    Expr* right;
+    Binary(Expr* left, Token* operation, Expr* right) {
         this->left=left;
         this->operation=operation;
         this->right=right;
     }
-    string accept(Visitor& visitor) {
-        return visitor.visitBinaryExpr(this);
+    string accept(Visitor* visitor) {
+        return visitor->visitBinaryExpr(this);
     }
 };
 
 class Grouping : public Expr {
 public:
-    Expr expression;
-    Grouping(Expr expression) {
+    Expr* expression;
+    Grouping(Expr* expression) {
         this->expression=expression;
     }
-    string accept(Visitor& visitor) {
-        return visitor.visitGroupingExpr(this);
+    string accept(Visitor* visitor) {
+        return visitor->visitGroupingExpr(this);
     }
 };
 
@@ -53,21 +54,21 @@ public:
     Literal(string value) {
         this->value=value;
     }
-    string accept(Visitor& visitor) {
-        return visitor.visitLiteralExpr(this);
+    string accept(Visitor* visitor) {
+        return visitor->visitLiteralExpr(this);
     }
 };
 
 class Unary : public Expr {
 public:
     Token* operation;
-    Expr right;
-    Unary(Token* operation, Expr right) {
+    Expr* right;
+    Unary(Token* operation, Expr* right) {
         this->operation=operation;
         this->right=right;
     }
-    string accept(Visitor& visitor) {
-        return visitor.visitUnaryExpr(this);
+    string accept(Visitor* visitor) {
+        return visitor->visitUnaryExpr(this);
     }
 };
 

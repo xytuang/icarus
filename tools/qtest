@@ -6,7 +6,7 @@ cp ../expr.h .
 cp ../token.h .
 cp ../token.cpp .
 cp ../tokentype.h .
-g++ -std=c++11 astprinter.cpp token.cpp -o printer
+g++ -std=c++11 token.cpp astprinter.cpp -o printer
 
 rm expr.h
 rm token.h

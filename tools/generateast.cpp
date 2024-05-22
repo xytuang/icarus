@@ -65,8 +65,8 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
         outFile << "        this->" << name << "=" << name << ";" << std::endl;   
     }
     outFile << "    }" << std::endl;
-    outFile << "    string accept(Visitor& visitor) {" << std::endl;
-    outFile << "        return visitor.visit" << className << baseName << "(this);" << std::endl;
+    outFile << "    string accept(Visitor* visitor) {" << std::endl;
+    outFile << "        return visitor->visit" << className << baseName << "(this);" << std::endl;
     outFile << "    }" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
@@ -100,7 +100,7 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
     outFile << "class " << baseName << "{" << std::endl;
     outFile << "public:" << std::endl;
     defineVisitor(outFile, baseName, types);
-    //outFile << "    string accept(Visitor& visitor) {return \"\";}" << std::endl;
+    outFile << "    virtual string accept(Visitor* visitor) = 0;" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
 
@@ -117,9 +117,9 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 
 int main() {
     std::string outputDir = "..";
-    std::vector<std::string> types = {"Binary   : Expr left, Token* operation, Expr right",
-      "Grouping : Expr expression",
+    std::vector<std::string> types = {"Binary   : Expr* left, Token* operation, Expr* right",
+      "Grouping : Expr* expression",
       "Literal  : string value",
-      "Unary    : Token* operation, Expr right"};
+      "Unary    : Token* operation, Expr* right"};
     defineAst(outputDir, "Expr", types);
 }
