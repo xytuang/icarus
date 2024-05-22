@@ -1,3 +1,5 @@
+#ifndef EXPR_H
+#define EXPR_H
 #include <vector>
 #include <string>
 #include "token.h"
@@ -72,3 +74,4 @@ public:
     }
 };
 
+#endif

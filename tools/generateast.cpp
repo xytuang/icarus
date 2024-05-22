@@ -80,7 +80,8 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
         std::cerr << "Error opening file for writing!" << std::endl;
         return;
     }
-
+    outFile << "#ifndef EXPR_H" << std::endl;
+    outFile << "#define EXPR_H" << std::endl;
     outFile << "#include <vector>" << std::endl;
     outFile << "#include <string>" << std::endl;
     outFile << "#include \"token.h\"" << std::endl;
@@ -111,7 +112,7 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
         std::string fields = trim(processed[1]);
         defineType(outFile, baseName, className, fields);
     }
-
+    outFile << "#endif" << std::endl;
     outFile.close();
 }
 

@@ -12,6 +12,7 @@
 
 #include "scanner.h"
 #include "token.h"
+#include "parser.h"
 
 bool hadError = false;
 
@@ -30,10 +31,13 @@ void handler(int sig) {
 void run(std::string source){
     Scanner *scanner = new Scanner(source);
     std::vector<Token *> tokens = scanner->scanTokens();
+    Parser* parser = new Parser(tokens);
+    Expr* expression = parser->parse();
 
-    for (Token *token : tokens) {
-        std::cout << *token << std::endl;
-    }
+    if (hadError) return;
+
+    //std::cout << new AstPrinter()->print(expression) << std::endl;
+
 }
 
 

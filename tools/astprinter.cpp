@@ -7,16 +7,6 @@
 
 class AstPrinter : public Expr::Visitor {
     private:
-        // Recursive function to handle variadic arguments and append them to a vector
-        void appendExprs(std::vector<Expr*>& vec) {
-            // Base case: No arguments to append, do nothing
-        }
-
-        template<typename T, typename... Args>
-        void appendExprs(std::vector<Expr*>& vec, T first, Args... args) {
-            vec.push_back(first); // Append the first argument to the vector
-            appendExprs(vec, args...); // Recursively handle the rest of the arguments
-        }
         std::string parenthesize(std::string name, std::initializer_list<Expr*> exprs) {
             std::string result = "(";
             result += name;
