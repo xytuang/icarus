@@ -1,3 +1,6 @@
+#ifndef ASTPRINTER_H
+#define ASTPRINTER_H
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -81,3 +84,5 @@ int main() {
   
 }
 */
+
+#endif

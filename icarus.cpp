@@ -8,7 +8,7 @@
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
-
+#include "astprinter.h"
 bool Icarus::hadError = false;
 
 void Icarus::run(std::string source){
@@ -19,7 +19,7 @@ void Icarus::run(std::string source){
 
     if (hadError) return;
 
-    //std::cout << new AstPrinter()->print(expression) << std::endl;
+    std::cout << (new AstPrinter())->print(expression) << std::endl;
 
 }
 
