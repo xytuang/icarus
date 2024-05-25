@@ -3,19 +3,21 @@
 #include <vector>
 #include <iterator>
 #include <sstream>
+#include <string>
 
 #include "icarus.h"
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
 #include "astprinter.h"
+
 bool Icarus::hadError = false;
 
 void Icarus::run(std::string source){
     Scanner *scanner = new Scanner(source);
     std::vector<Token *> tokens = scanner->scanTokens();
-    Parser* parser = new Parser(tokens);
-    Expr* expression = parser->parse();
+    Parser<std::string>* parser = new Parser<std::string>(tokens);
+    Expr<std::string>* expression = parser->parse();
 
     if (hadError) return;
 

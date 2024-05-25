@@ -6,71 +6,78 @@
 #include "token.h"
 using namespace std;
 
-class Binary;
-class Grouping;
-class Literal;
-class Unary;
+template <typename R> class Binary;
+template <typename R> class Grouping;
+template <typename R> class Literal;
+template <typename R> class Unary;
 
+template <typename R>
 class Expr{
 public:
+    template <typename T>
     class Visitor {
     public:
-        virtual string visitBinaryExpr (Binary* expr) = 0;
-        virtual string visitGroupingExpr (Grouping* expr) = 0;
-        virtual string visitLiteralExpr (Literal* expr) = 0;
-        virtual string visitUnaryExpr (Unary* expr) = 0;
+        virtual T visitBinaryExpr (Binary<R>* expr) = 0;
+        virtual T visitGroupingExpr (Grouping<R>* expr) = 0;
+        virtual T visitLiteralExpr (Literal<R>* expr) = 0;
+        virtual T visitUnaryExpr (Unary<R>* expr) = 0;
         virtual ~Visitor() = default;
     };
 
-    virtual string accept(Visitor* visitor) = 0;
+    virtual R accept(Visitor<R>* visitor) = 0;
+    virtual ~Expr() = default;
 };
 
-class Binary : public Expr {
+template <typename R>
+class Binary : public Expr<R> {
 public:
-    Expr* left;
+    Expr<R>* left;
     Token* operation;
-    Expr* right;
-    Binary(Expr* left, Token* operation, Expr* right) {
+    Expr<R>* right;
+    Binary(Expr<R>* left, Token* operation, Expr<R>* right) {
         this->left=left;
         this->operation=operation;
         this->right=right;
     }
-    string accept(Visitor* visitor) {
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitBinaryExpr(this);
     }
 };
 
-class Grouping : public Expr {
+template <typename R>
+class Grouping : public Expr<R> {
 public:
-    Expr* expression;
-    Grouping(Expr* expression) {
+    Expr<R>* expression;
+    Grouping(Expr<R>* expression) {
         this->expression=expression;
     }
-    string accept(Visitor* visitor) {
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitGroupingExpr(this);
     }
 };
 
-class Literal : public Expr {
+template <typename R>
+class Literal : public Expr<R> {
 public:
     any value;
     Literal(any value) {
         this->value=value;
     }
-    string accept(Visitor* visitor) {
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitLiteralExpr(this);
     }
 };
 
-class Unary : public Expr {
+template <typename R>
+class Unary : public Expr<R> {
 public:
     Token* operation;
-    Expr* right;
-    Unary(Token* operation, Expr* right) {
+    Expr<R>* right;
+    Unary(Token* operation, Expr<R>* right) {
         this->operation=operation;
         this->right=right;
     }
-    string accept(Visitor* visitor) {
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitUnaryExpr(this);
     }
 };

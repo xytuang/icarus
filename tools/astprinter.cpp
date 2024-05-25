@@ -5,12 +5,12 @@
 #include "token.h"
 #include "tokentype.h"
 
-class AstPrinter : public Expr::Visitor {
+class AstPrinter : public Expr<std::string>::Visitor<std::string> {
     private:
-        std::string parenthesize(std::string name, std::initializer_list<Expr*> exprs) {
+        std::string parenthesize(std::string name, std::initializer_list<Expr<std::string>*> exprs) {
             std::string result = "(";
             result += name;
-            std::vector<Expr*> vec(exprs);
+            std::vector<Expr<std::string>*> vec(exprs);
             for (int i = 0; i < vec.size(); i++) {
                 result += " ";
                 result += vec[i]->accept(this);
@@ -19,18 +19,18 @@ class AstPrinter : public Expr::Visitor {
             return result;
         }
     public:
-        std::string print(Expr* expr) {
+        std::string print(Expr<std::string>* expr) {
             return expr->accept(this);
         }
-        std::string visitBinaryExpr(Binary* expr) {
+        std::string visitBinaryExpr(Binary<std::string>* expr) {
             return parenthesize(expr->operation->getLexeme(), {expr->left, expr->right});
         }
 
-        std::string visitGroupingExpr(Grouping* expr) {
+        std::string visitGroupingExpr(Grouping<std::string>* expr) {
             return parenthesize("group", {expr->expression});
         }
 
-        std::string visitLiteralExpr(Literal* expr) {
+        std::string visitLiteralExpr(Literal<std::string>* expr) {
             std::string valueAsString;
             if (expr->value.has_value()) {
                 if (expr->value.type() == typeid(std::string)) {
@@ -61,23 +61,21 @@ class AstPrinter : public Expr::Visitor {
 
         }
 
-        std::string visitUnaryExpr(Unary* expr) {
+        std::string visitUnaryExpr(Unary<std::string>* expr) {
             return parenthesize(expr->operation->getLexeme(), {expr->right});
         }
 };
 
-/*
 int main() {
-    Expr* expression = new Binary(
-        new Unary(
+    Expr<std::string>* expression = new Binary<std::string>(
+        new Unary<std::string>(
             new Token(MINUS, "-", nullptr, 1),
-            new Literal(123)),
+            new Literal<std::string>(123)),
         new Token(STAR, "*", nullptr, 1),
-        new Grouping(
-            new Literal(45.67)));
-    AstPrinter * printer = new AstPrinter();
+        new Grouping<std::string>(
+            new Literal<std::string>(45.67)));
+    AstPrinter* printer = new AstPrinter();
     std::string result = printer->print(expression);
     std::cout << result  << std::endl;
   
 }
-*/

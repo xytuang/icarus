@@ -4,50 +4,61 @@
 #include "expr.h"
 #include "icarus.h"
 
-Parser::Parser(std::vector<Token*> tokens){
+template <typename R>
+Parser<R>::Parser(std::vector<Token*> tokens){
     this->tokens = tokens;
     this->current = 0;
 }
 
 
-Token* Parser::peek() {
+template <typename R>
+Token* Parser<R>::peek() {
     return this->tokens[this->current];
 }
 
-bool Parser::isAtEnd() {
+template <typename R>
+bool Parser<R>::isAtEnd() {
     return peek()->getType() == END_OF_FILE;
 }
 
 
-Token* Parser::previous(){
+template <typename R>
+Token* Parser<R>::previous(){
     return this->tokens[this->current - 1];
 }
 
-Token* Parser::advance() {
+template <typename R>
+Token* Parser<R>::advance() {
     if (!isAtEnd()) {
         this->current++;
     }
     return previous();
 }
 
-bool Parser::check(TokenType type) {
+template <typename R>
+bool Parser<R>::check(TokenType type) {
     if (isAtEnd()) {
         return false;
     }
     return peek()->getType() == type;
 }
 
-Parser::ParseError* Parser::error(Token* token, std::string message) {
+template <typename R>
+typename Parser<R>::ParseError* Parser<R>::error(Token* token, std::string message) {
     Icarus::error(token, message);
     return new Parser::ParseError();
 }
 
 
-Token* Parser::consume(TokenType type, std::string message) {
+template <typename R>
+Token* Parser<R>::consume(TokenType type, std::string message) {
     if(check(type)) return advance();
     throw error(peek(), message);
 }
-void Parser::synchronize() {
+
+
+template <typename R>
+void Parser<R>::synchronize() {
     advance();
     while(!isAtEnd()) {
         if(previous()->getType() == SEMICOLON) return;
@@ -69,7 +80,8 @@ void Parser::synchronize() {
     }
 }
 
-bool Parser::match(std::initializer_list<TokenType> types) {
+template <typename R>
+    bool Parser<R>::match(std::initializer_list<TokenType> types) {
     std::vector<TokenType> vec(types);
     for (int i = 0; i < vec.size(); i++) {
         if (check(vec[i])){
@@ -80,15 +92,16 @@ bool Parser::match(std::initializer_list<TokenType> types) {
     return false;
 }
 
-Expr* Parser::primary() {
-    if (match({FALSE})) return new Literal("false");
-    if (match({TRUE})) return new Literal("true");
-    if (match({NIL})) return new Literal("");
+template <typename R>
+Expr<R>* Parser<R>::primary() {
+    if (match({FALSE})) return new Literal<R>(false);
+    if (match({TRUE})) return new Literal<R>(true);
+    if (match({NIL})) return new Literal<R>(nullptr);
 
-    if (match({NUMBER, STRING})) return new Literal(previous()->getLiteral());
+    if (match({NUMBER, STRING})) return new Literal<R>(previous()->getLiteral());
 
     if (match({LEFT_PAREN})) {
-        Expr* expr = expression();
+        Expr<R>* expr = expression();
         consume(RIGHT_PAREN, "Expect \')\' after expression.");
         return new Grouping(expr);
     }
@@ -96,62 +109,69 @@ Expr* Parser::primary() {
     throw error(peek(), "Expect expression");
 }
 
-Expr* Parser::unary() {
+template <typename R>
+Expr<R>* Parser<R>::unary() {
     while(match({BANG, MINUS})){
         Token* operation = previous();
-        Expr* right = unary();
-        return new Unary(operation, right);
+        Expr<R>* right = unary();
+        return new Unary<R>(operation, right);
     }
     return primary();
 }
 
-Expr* Parser::factor() {
-    Expr* expr = unary();
+template <typename R>
+Expr<R>* Parser<R>::factor() {
+    Expr<R>* expr = unary();
     while(match({SLASH, STAR})) {
         Token* operation = previous();
-        Expr* right = unary();
-        expr = new Binary(expr, operation, right);
+        Expr<R>* right = unary();
+        expr = new Binary<R>(expr, operation, right);
     }
     return expr;
 }
 
-Expr* Parser::term() {
-    Expr* expr = factor();
+template <typename R>
+Expr<R>* Parser<R>::term() {
+    Expr<R>* expr = factor();
 
     while(match({MINUS, PLUS})) {
         Token* operation = previous();
-        Expr* right = factor();
-        expr = new Binary(expr, operation, right);
+        Expr<R>* right = factor();
+        expr = new Binary<R>(expr, operation, right);
     }
     return expr;
 }
 
-Expr* Parser::comparison() {
-    Expr* expr = term();
+template <typename R>
+Expr<R>* Parser<R>::comparison() {
+    Expr<R>* expr = term();
 
     while(match({GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
         Token* operation = previous();
-        Expr* right = term();
-        expr = new Binary(expr, operation, right);
+        Expr<R>* right = term();
+        expr = new Binary<R>(expr, operation, right);
     }
     return expr;
 }
 
-Expr* Parser::equality() {
-    Expr* expr = comparison();
+template <typename R>
+Expr<R>* Parser<R>::equality() {
+    Expr<R>* expr = comparison();
     while(match({BANG_EQUAL, EQUAL_EQUAL})){
         Token* operation = previous();
-        Expr* right = comparison();
-        expr = new Binary(expr, operation, right);
+        Expr<R>* right = comparison();
+        expr = new Binary<R>(expr, operation, right);
     }
     return expr;
 }
 
-Expr* Parser::expression() {
+template <typename R>
+Expr<R>* Parser<R>::expression() {
     return equality();
 }
 
-Expr* Parser::parse() {
+template <typename R>
+Expr<R>* Parser<R>::parse() {
     try {
         return expression();
     } catch (Parser::ParseError error) {

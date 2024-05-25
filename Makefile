@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -g
 LDFLAGS = -rdynamic
 
-SRCS = main.cpp icarus.cpp token.cpp scanner.cpp parser.cpp
+SRCS = main.cpp icarus.cpp token.cpp scanner.cpp
 OBJS = ${SRCS:.cpp=.o}
 HEADERS = 
 

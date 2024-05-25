@@ -34,6 +34,7 @@ std::vector<std::string> splitString(const std::string str, char delimiter) {
 
 
 void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std::string> types) {
+    outFile << "    template <typename T>" << std::endl;
     outFile << "    class Visitor {" << std::endl;
     outFile << "    public:" << std::endl;
     for (int i = 0; i < types.size(); i++) {
@@ -42,7 +43,7 @@ void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std:
         for (int i = 0; i < baseLower.size(); i++) {
             baseLower[i] = tolower(baseLower[i]);
         }
-        outFile << "        virtual string visit" << typeName << baseName << " (" << typeName << "* " << baseLower << ") = 0;" << std::endl;
+        outFile << "        virtual T visit" << typeName << baseName << " (" << typeName << "<R>* " << baseLower << ") = 0;" << std::endl;
     }
     outFile << "        virtual ~Visitor() = default;" << std::endl;
     outFile << "    };" << std::endl;
@@ -50,7 +51,8 @@ void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std:
 }
 
 void defineType(std::ofstream& outFile, std::string baseName, std::string className, std::string fields) {
-    outFile << "class " << className << " : public " << baseName << " {" << std::endl;
+    outFile << "template <typename R>" << std::endl;
+    outFile << "class " << className << " : public " << baseName << "<R> {" << std::endl;
     outFile << "public:" << std::endl;
     std::vector<std::string> fieldList = splitString(fields, ',');
     for (int i = 0; i < fieldList.size(); i++) {
@@ -65,7 +67,7 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
         outFile << "        this->" << name << "=" << name << ";" << std::endl;   
     }
     outFile << "    }" << std::endl;
-    outFile << "    string accept(Visitor* visitor) {" << std::endl;
+    outFile << "    R accept(typename Expr<R>::template Visitor<R>* visitor) override {" << std::endl;
     outFile << "        return visitor->visit" << className << baseName << "(this);" << std::endl;
     outFile << "    }" << std::endl;
     outFile << "};" << std::endl;
@@ -93,16 +95,18 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
     for (std::string type: types ) {
         std::vector<std::string> processed = splitString(type, ':');
         std::string className = trim(processed[0]);
-        outFile << "class " << className << ";" << std::endl;
+        outFile << "template <typename R> class " << className << ";" << std::endl;
     }
 
     outFile << std::endl;
 
     // writing Expr class
+    outFile << "template <typename R>" << std::endl;
     outFile << "class " << baseName << "{" << std::endl;
     outFile << "public:" << std::endl;
     defineVisitor(outFile, baseName, types);
-    outFile << "    virtual string accept(Visitor* visitor) = 0;" << std::endl;
+    outFile << "    virtual R accept(Visitor<R>* visitor) = 0;" << std::endl;
+    outFile << "    virtual ~Expr() = default;" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
 
@@ -119,9 +123,9 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 
 int main() {
     std::string outputDir = "..";
-    std::vector<std::string> types = {"Binary   : Expr* left, Token* operation, Expr* right",
-      "Grouping : Expr* expression",
+    std::vector<std::string> types = {"Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
+      "Grouping : Expr<R>* expression",
       "Literal  : any value",
-      "Unary    : Token* operation, Expr* right"};
+      "Unary    : Token* operation, Expr<R>* right"};
     defineAst(outputDir, "Expr", types);
 }
