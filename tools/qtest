@@ -1,12 +1,12 @@
 #!/bin/bash
 
-g++ -std=c++11 generateast.cpp -o generateast
+g++ -std=c++17 generateast.cpp -o generateast
 ./generateast
 cp ../expr.h .
 cp ../token.h .
 cp ../token.cpp .
 cp ../tokentype.h .
-g++ -std=c++11 token.cpp astprinter.cpp -o printer
+g++ -std=c++17 token.cpp astprinter.cpp -o printer
 
 rm expr.h
 rm token.h

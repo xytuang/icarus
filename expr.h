@@ -2,6 +2,7 @@
 #define EXPR_H
 #include <vector>
 #include <string>
+#include <any>
 #include "token.h"
 using namespace std;
 
@@ -52,8 +53,8 @@ public:
 
 class Literal : public Expr {
 public:
-    string value;
-    Literal(string value) {
+    any value;
+    Literal(any value) {
         this->value=value;
     }
     string accept(Visitor* visitor) {

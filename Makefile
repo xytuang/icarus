@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++0x -Wall -g
+CXXFLAGS = -std=c++17 -Wall -g
 LDFLAGS = -rdynamic
 
 SRCS = main.cpp icarus.cpp token.cpp scanner.cpp parser.cpp

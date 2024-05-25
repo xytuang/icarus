@@ -84,6 +84,7 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
     outFile << "#define EXPR_H" << std::endl;
     outFile << "#include <vector>" << std::endl;
     outFile << "#include <string>" << std::endl;
+    outFile << "#include <any>" << std::endl;
     outFile << "#include \"token.h\"" << std::endl;
     outFile << "using namespace std;" << std::endl;
     outFile << std::endl;
@@ -120,7 +121,7 @@ int main() {
     std::string outputDir = "..";
     std::vector<std::string> types = {"Binary   : Expr* left, Token* operation, Expr* right",
       "Grouping : Expr* expression",
-      "Literal  : string value",
+      "Literal  : any value",
       "Unary    : Token* operation, Expr* right"};
     defineAst(outputDir, "Expr", types);
 }
