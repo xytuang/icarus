@@ -56,3 +56,46 @@ hold different datatypes. The only worry I have for using std::any is that I
 have to cast std::any to the correct type before using the value stored in it,
 which I suspect will be very error-prone. The code also becomes very bloated
 because of all the casting required.
+
+25 May 2024:
+Correction to the entry on 21 May 2024. Virtual functions can have generics.
+Example:
+
+template <typename R>
+class myClass {
+    virtual R myMethod() = 0;
+}
+
+The above is fine. The following is not:
+
+class myClass {
+    template <typename R>
+    virtual R myMethod() = 0;
+}
+
+Knowing this, I corrected generateast.cpp, expr.h and parser.h. I also included 
+templates wherever expr objects were needed. I also moved the function
+implementations in parser.cpp into parser.h as the functions were all template
+functions. parser.cpp is now removed from the Makefile.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
