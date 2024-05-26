@@ -1,3 +1,4 @@
+#include <any>
 #include "scanner.h"
 #include "icarus.h"
 
@@ -22,13 +23,13 @@ char Scanner::advance() {
     return this->source[current++];
 }
 
-void Scanner::addToken(TokenType type, std::string literal) {
+void Scanner::addToken(TokenType type, std::any literal) { //ERROR SUSPECT
     std::string text = source.substr(start, current - start);
     tokens.push_back(new Token(type, text, literal, line));
 }
 
 void Scanner::addToken(TokenType type) {
-    addToken(type, "");
+    addToken(type, nullptr); //ERROR SUSPECT
 }
 
 char Scanner::peek() {
@@ -69,7 +70,7 @@ void Scanner::parseNumber() {
         advance();
         while(isDigit(peek())) advance();
     }
-    addToken(NUMBER, source.substr(start, current - start));
+    addToken(NUMBER, std::stod(source.substr(start, current - start)));
 }
 
 
@@ -165,6 +166,6 @@ std::vector<Token *> Scanner::scanTokens() {
         start = current;
         scanToken();
     }
-    this->tokens.push_back(new Token(END_OF_FILE, "", "", line));
+    this->tokens.push_back(new Token(END_OF_FILE, "", nullptr, line));
     return this->tokens;
 }

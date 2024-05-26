@@ -49,14 +49,15 @@ bool Interpreter::isTruthy(std::any object) {
 }
 
 void Interpreter::checkNumberOperand(Token* operation, std::any operand) {
-    if (operand.type() == typeid(int) || operand.type() == typeid(double)) {
+    if (operand.type() == typeid(double)) {
         return;
     }
     throw new RuntimeError(operation, "Operand must be a number");
 }
 
 void Interpreter::checkNumberOperands(Token* operation, std::any left, std::any right) {
-    if ((left.type() != typeid(int) && left.type() != typeid(double)) || (right.type() != typeid(int) && right.type() != typeid(double))) {
+
+    if (left.type() == typeid(double) && right.type() == typeid(double)) {
         return;
     }
     throw new RuntimeError(operation, "Operands must be numbers");
@@ -77,10 +78,13 @@ std::string Interpreter::stringify(std::any object) {
         return text;
     }
 
-    if (object.type() == typeid(int)) {
-        return std::to_string(std::any_cast<int>(object));
-    } else if (object.type() == typeid(std::string)) {
+    else if (object.type() == typeid(std::string)) {
         return std::any_cast<std::string>(object);
+    }
+
+    else if(object.type() == typeid(bool)) {
+        bool value = std::any_cast<bool>(object);
+        return std::to_string(value);
     }
     return "unsupported";
 }
@@ -100,8 +104,6 @@ std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
             return isTruthy(right);
         case MINUS:
             checkNumberOperand(expr->operation, right);
-            if (right.type() == typeid(int))
-                return -(static_cast<double>((std::any_cast<int>(right))));
             if (right.type() == typeid(double))
                 return -(std::any_cast<double>(right));
             break;
@@ -112,62 +114,49 @@ std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
 }
 
 std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
-    std::any left = expr->left;
-    std::any right = expr->right;
+    std::any left = evaluate(expr->left);
+    std::any right = evaluate(expr->right);
 
     switch(expr->operation->getType()) {
         case GREATER:
         {
             checkNumberOperands(expr->operation, left, right);
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum > rightNum;
+            return std::any_cast<double>(left) > std::any_cast<double>(right);
         }
             break;
 
         case GREATER_EQUAL: 
         {
             checkNumberOperands(expr->operation, left, right);
-
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum >= rightNum;
+            return std::any_cast<double>(left) >= std::any_cast<double>(right);
         }
             break;
         case LESS:
         {
             checkNumberOperands(expr->operation, left, right);
-
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum < rightNum;
+            return std::any_cast<double>(left) < std::any_cast<double>(right);
         }
             break;
 
         case LESS_EQUAL:
         {
             checkNumberOperands(expr->operation, left, right);
-
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum <= rightNum;
+            return std::any_cast<double>(left) <= std::any_cast<double>(right);
         }
             break;
         case MINUS:
 
         {
             checkNumberOperands(expr->operation, left, right);
-
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum - rightNum;
+            return std::any_cast<double>(left) - std::any_cast<double>(right);
         }
             break;
 
-        case PLUS: 
-            if ((left.type() == typeid(int) || left.type() != typeid(double)) && (right.type() == typeid(int) || right.type() == typeid(double))) {
-                double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-                double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
+        case PLUS:
+        { 
+            if ((left.type() == typeid(double)) && right.type() == typeid(double)) {
+                double leftNum = std::any_cast<double>(left);
+                double rightNum = std::any_cast<double>(right);
                 return leftNum + rightNum;
             }
             else if (left.type() == typeid(std::string) && right.type() == typeid(std::string)) {
@@ -175,15 +164,13 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
             }
 
             throw new RuntimeError(expr->operation, "Operands must be two numbers or two strings");
+        }
             break;
 
         case SLASH:
         {
             checkNumberOperands(expr->operation, left, right);
-
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum / rightNum;
+            return std::any_cast<double>(left) / std::any_cast<double>(right);
         }
             break;
 
@@ -191,9 +178,7 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
         {
             checkNumberOperands(expr->operation, left, right);
 
-            double leftNum = left.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(left)) : std::any_cast<double>(left);
-            double rightNum = right.type() == typeid(int) ? static_cast<double>(std::any_cast<int>(right)) : std::any_cast<double>(right);
-            return leftNum * rightNum;
+            return std::any_cast<double>(left) * std::any_cast<double>(right);
         }
             break;
 
@@ -212,7 +197,7 @@ void Interpreter::interpret(Expr<std::any>* expr) {
     try {
         std::any value = evaluate(expr);
         std::cout << stringify(value) << endl;
-    } catch (RuntimeError error){
+    } catch (RuntimeError* error){
         Icarus::runtimeError(error);
     }
 }

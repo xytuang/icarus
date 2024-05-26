@@ -25,7 +25,7 @@ class Icarus {
         
         static void error(int line, std::string message);
 
-        static void runtimeError(RuntimeError error);
+        static void runtimeError(RuntimeError* error);
 };
 
 #endif

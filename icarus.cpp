@@ -78,8 +78,8 @@ void Icarus::error(int line, std::string message){
     report(line, "", message);
 }
 
-void Icarus::runtimeError(RuntimeError error) {
-    std::cerr << error.what() << std::endl;
-    std::cerr << "[line " << error.token->getLine() << + "]" << std::endl;
+void Icarus::runtimeError(RuntimeError* error) {
+    std::cerr << error->what() << std::endl;
+    std::cerr << "[line " << error->token->getLine() << + "]" << std::endl;
     hadRuntimeError = true;
 }

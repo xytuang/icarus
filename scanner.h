@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <any>
 
 #include "tokentype.h"
 #include "token.h"
@@ -27,7 +28,7 @@ class Scanner {
 
         char  advance();
 
-        void addToken(TokenType type, std::string literal);
+        void addToken(TokenType type, std::any literal);
 
         void addToken(TokenType type);
 

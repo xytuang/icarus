@@ -46,7 +46,7 @@ bool Parser<R>::check(TokenType type) {
 template <typename R>
 typename Parser<R>::ParseError* Parser<R>::error(Token* token, std::string message) {
     Icarus::error(token, message);
-    return new Parser::ParseError();
+    return new Parser<R>::ParseError();
 }
 
 
@@ -174,7 +174,7 @@ template <typename R>
 Expr<R>* Parser<R>::parse() {
     try {
         return expression();
-    } catch (Parser::ParseError error) {
+    } catch (Parser<R>::ParseError* error) {
         return nullptr;
     }
 }
