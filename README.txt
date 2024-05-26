@@ -1,3 +1,11 @@
+High level overview of how an interpreted programming language works:
+1. Take user input
+2. Turn user input into tokens (scannning phase)
+3. Group tokens together based on grammar to form your abstract syntax tree 
+   (parsing phase)
+4. Interpret the abstract syntax tree (interpreting phase)
+
+
 18 May 2024:
 Set up
 
@@ -80,9 +88,25 @@ functions. parser.cpp is now removed from the Makefile.
 
 
 
+26 May 2024:
+Made a very minimalist interpreter that can only do arithmetic and logical
+comparisons. Was stuck on the interpreter for awhile because of 2 bugs in
+interpreter.cpp.
 
+The bug:
 
+std::any left = expr->left;
+std::any right = expr->right;
 
+Corrected the bug to:
+
+std::any left = evalaute(expr->left);
+std::any right = evaluate(expr->right);
+
+Essentially forgot to evaluate the operands on each side before tyring to
+operate on them. Learned the job of an interpreter: to produce an output based
+on an abstract syntax tree/expression. Expressions and abstract syntax trees are
+synonymous with each other.
 
 
 
