@@ -2,11 +2,16 @@
 #define ICARUS_H
 
 #include <string>
+#include "interpreter.h"
 #include "token.h"
+#include "runtime_error.h"
 
 class Icarus {
     public:
+        static Interpreter* interpreter;
         static bool hadError;
+
+        static bool hadRuntimeError;
 
         static void run(std::string source);
 
@@ -19,6 +24,8 @@ class Icarus {
         static void error(Token* token, std::string message);
         
         static void error(int line, std::string message);
+
+        static void runtimeError(RuntimeError error);
 };
 
 #endif

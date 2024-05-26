@@ -4,24 +4,32 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <cstdlib>
 
 #include "icarus.h"
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
 #include "astprinter.h"
+#include "runtime_error.h"
+
+Interpreter* Icarus::interpreter = new Interpreter(); 
 
 bool Icarus::hadError = false;
+
+bool Icarus::hadRuntimeError = false;
 
 void Icarus::run(std::string source){
     Scanner *scanner = new Scanner(source);
     std::vector<Token *> tokens = scanner->scanTokens();
-    Parser<std::string>* parser = new Parser<std::string>(tokens);
-    Expr<std::string>* expression = parser->parse();
+    Parser<std::any>* parser = new Parser<std::any>(tokens);
+    Expr<std::any>* expression = parser->parse();
 
     if (hadError) return;
 
-    std::cout << (new AstPrinter())->print(expression) << std::endl;
+    //std::cout << (new AstPrinter())->print(expression) << std::endl;
+
+    interpreter->interpret(expression);
 
 }
 
@@ -36,7 +44,8 @@ void Icarus::runFile(char *filename) {
     file.close();
     std::string fileString(fileContents.begin(), fileContents.end());
     run(fileString);
-    if (hadError) exit(1);
+    if (hadError) exit(65);
+    if (hadRuntimeError) exit(70);
 }
 
 
@@ -67,4 +76,10 @@ void Icarus::error(Token* token, std::string message){
 }
 void Icarus::error(int line, std::string message){
     report(line, "", message);
+}
+
+void Icarus::runtimeError(RuntimeError error) {
+    std::cerr << error.what() << std::endl;
+    std::cerr << "[line " << error.token->getLine() << + "]" << std::endl;
+    hadRuntimeError = true;
 }
