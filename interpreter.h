@@ -11,7 +11,7 @@
 class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>::Visitor<std::any> {
     private:
         std::any evaluate(Expr<std::any>* expr);
-        void execute(Stmt<void>* stmt);
+        std::any execute(Stmt<std::any>* stmt);
 
         bool isEqual(std::any A, std::any B);
         bool isTruthy(std::any object);

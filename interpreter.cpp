@@ -14,8 +14,9 @@ std::any Interpreter::evaluate(Expr<std::any>* expr) {
     return expr->accept(this);
 }
 
-void Interpreter::execute(Stmt<void>* stmt) {
+std::any Interpreter::execute(Stmt<std::any>* stmt) {
     stmt->accept(this);
+    return nullptr;
 }
 
 
@@ -200,24 +201,26 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
     return nullptr;
 }
 
-void Interpreter::visitExpressionStmt(Expression<void>* stmt) {
+std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
     evaluate(stmt->expression);
-    return;
+    return nullptr;
 }
 
 
-void Interpreter::visitPrintStmt(Print<void>* stmt) {
+std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
     std::any value = evaluate(stmt->expression);
     std::cout <<  stringify(value) << std::endl;
+    return nullptr;
 }
 
 
-void Interpreter::interpret(std::vector<Stmt<void>*> statements) {
+std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
     try {
-        for (Stmt<void>* stmt : statements) {
+        for (Stmt<std::any>* stmt : statements) {
             execute(stmt);
         }
     } catch (RuntimeError* error){
         Icarus::runtimeError(error);
     }
+    return nullptr;
 }

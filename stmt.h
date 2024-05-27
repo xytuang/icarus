@@ -4,9 +4,6 @@
 #include <string>
 #include <any>
 #include "token.h"
-
-#include "expr.h"
-
 using namespace std;
 
 template <typename R> class Expression;
@@ -34,7 +31,7 @@ public:
     Expression(Expr<R>* expression) {
         this->expression=expression;
     }
-    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
         return visitor->visitExpressionStmt(this);
     }
 };
@@ -46,7 +43,7 @@ public:
     Print(Expr<R>* expression) {
         this->expression=expression;
     }
-    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
         return visitor->visitPrintStmt(this);
     }
 };

@@ -83,7 +83,7 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
         outFile << "        this->" << name << "=" << name << ";" << std::endl;   
     }
     outFile << "    }" << std::endl;
-    outFile << "    R accept(typename Expr<R>::template Visitor<R>* visitor) override {" << std::endl;
+    outFile << "    R accept(typename " << baseName << "<R>::template Visitor<R>* visitor) override {" << std::endl;
     outFile << "        return visitor->visit" << className << baseName << "(this);" << std::endl;
     outFile << "    }" << std::endl;
     outFile << "};" << std::endl;
