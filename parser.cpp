@@ -1,8 +1,10 @@
 #include <string>
+#include <vector>
 #include "parser.h"
 #include "token.h"
 #include "expr.h"
 #include "icarus.h"
+#include "stmt.h"
 
 template <typename R>
 Parser<R>::Parser(std::vector<Token*> tokens){
@@ -170,11 +172,32 @@ Expr<R>* Parser<R>::expression() {
     return equality();
 }
 
-template <typename R>
-Expr<R>* Parser<R>::parse() {
-    try {
-        return expression();
-    } catch (Parser<R>::ParseError* error) {
-        return nullptr;
+
+Stmt<R>* Parser<R>::expressionStatement() {
+    Expr<R>* expr = expression();
+    consume(SEMICOLON, "Expect \';\' after a value");
+    return new Print<R>(value);
+}
+Stmt<R>* Parser<R>::printStatement() {
+    Expr<R>* expr = expression();
+    consume(SEMICOLON, "Expect \';\' after a value");
+    return new Expression<R>(expr);
+}
+
+Stmt<R>* Parser<R>::statement() {
+    if (match(PRINT)) {
+        return printStatement();
     }
+    return expressionStatement();
+}
+
+
+
+template <typename R>
+std::vector<Stmt<R>*> Parser<R>::parse() {
+    std::vector<Stmt<R>*> statements;
+    while(!isAtEnd()){
+        statements.push_back(statement());
+    }
+    return statements;
 }

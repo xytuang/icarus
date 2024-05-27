@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <cctype>
 
 std::string trim(const std::string& str) {
     size_t start = 0;
@@ -32,6 +33,21 @@ std::vector<std::string> splitString(const std::string str, char delimiter) {
     return tokens;
 }
 
+std::string toLowercase(const std::string& str) {
+    std::string lowercaseStr = str;
+    for (char& c : lowercaseStr) {
+        c = std::tolower(c);
+    }
+    return lowercaseStr;
+}
+
+std::string toUppercase(const std::string& str) {
+    std::string uppercaseStr = str;
+    for (char& c : uppercaseStr) {
+        c = std::toupper(c);
+    }
+    return uppercaseStr;
+}
 
 void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std::string> types) {
     outFile << "    template <typename T>" << std::endl;
@@ -76,14 +92,14 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
 }
 
 void defineAst(std::string outputDir, std::string baseName, std::vector<std::string> types) {
-    std::string path = outputDir + "/expr.h";
+    std::string path = outputDir + "/" + toLowercase(baseName) + ".h"; //Change accordingly
     std::ofstream outFile(path);
     if (!outFile) {
         std::cerr << "Error opening file for writing!" << std::endl;
         return;
     }
-    outFile << "#ifndef EXPR_H" << std::endl;
-    outFile << "#define EXPR_H" << std::endl;
+    outFile << "#ifndef " << toUppercase(baseName) << "_H" << std::endl; //Change accordingly
+    outFile << "#define " << toUppercase(baseName) << "_H" << std::endl; //Change accordingly
     outFile << "#include <vector>" << std::endl;
     outFile << "#include <string>" << std::endl;
     outFile << "#include <any>" << std::endl;
@@ -100,13 +116,13 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 
     outFile << std::endl;
 
-    // writing Expr class
+    // writing base class
     outFile << "template <typename R>" << std::endl;
     outFile << "class " << baseName << "{" << std::endl;
     outFile << "public:" << std::endl;
     defineVisitor(outFile, baseName, types);
     outFile << "    virtual R accept(Visitor<R>* visitor) = 0;" << std::endl;
-    outFile << "    virtual ~Expr() = default;" << std::endl;
+    outFile << "    virtual ~" << baseName << "() = default;" << std::endl;
     outFile << "};" << std::endl;
     outFile << std::endl;
 
@@ -123,9 +139,13 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 
 int main() {
     std::string outputDir = "..";
-    std::vector<std::string> types = {"Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
+    
+    std::vector<std::string> expressionTypes = {"Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
       "Grouping : Expr<R>* expression",
       "Literal  : any value",
       "Unary    : Token* operation, Expr<R>* right"};
-    defineAst(outputDir, "Expr", types);
+    defineAst(outputDir, "Expr", expressionTypes);
+    
+    std::vector<std::string> statementTypes = {"Expression : Expr<R>* expression", "Print : Expr<R>* expression"};
+    defineAst(outputDir, "Stmt", statementTypes);
 }

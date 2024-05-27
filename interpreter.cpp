@@ -1,6 +1,8 @@
 #include <any>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
+
 #include "interpreter.h"
 #include "expr.h"
 #include "token.h"
@@ -11,6 +13,11 @@
 std::any Interpreter::evaluate(Expr<std::any>* expr) {
     return expr->accept(this);
 }
+
+void Interpreter::execute(Stmt<void>* stmt) {
+    stmt->accept(this);
+}
+
 
 bool Interpreter::isEqual(std::any a, std::any b) {
     if (a.type() == typeid(std::nullptr_t) && b.type() == typeid(std::nullptr_t)) {
@@ -193,10 +200,23 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
     return nullptr;
 }
 
-void Interpreter::interpret(Expr<std::any>* expr) {
+void Interpreter::visitExpressionStmt(Expression<void>* stmt) {
+    evaluate(stmt->expression);
+    return;
+}
+
+
+void Interpreter::visitPrintStmt(Print<void>* stmt) {
+    std::any value = evaluate(stmt->expression);
+    std::cout <<  stringify(value) << std::endl;
+}
+
+
+void Interpreter::interpret(std::vector<Stmt<void>*> statements) {
     try {
-        std::any value = evaluate(expr);
-        std::cout << stringify(value) << endl;
+        for (Stmt<void>* stmt : statements) {
+            execute(stmt);
+        }
     } catch (RuntimeError* error){
         Icarus::runtimeError(error);
     }

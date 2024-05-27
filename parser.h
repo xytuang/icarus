@@ -3,16 +3,18 @@
 
 #include <string>
 #include <vector>
+#include <exception>
+
 #include "expr.h"
 #include "tokentype.h"
-#include <exception>
+#include "stmt.h"
 
 template <typename R>
 class Parser {
     public:
         class ParseError : public std::exception {};
         Parser<R>(std::vector<Token*> tokens);
-        Expr<R>* parse();
+        std::vector<Stmt<R>*> parse();
 
     private:
         std::vector<Token *> tokens;
@@ -39,6 +41,11 @@ class Parser {
         Expr<R>* comparison();
         Expr<R>* equality();
         Expr<R>* expression();
+
+
+        Stmt<R>* expressionStatement();
+        Stmt<R>* printStatement();
+        Stmt<R>* statement();
 
 
 };

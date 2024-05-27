@@ -10,8 +10,9 @@
 #include "scanner.h"
 #include "token.h"
 #include "parser.h"
-#include "astprinter.h"
 #include "runtime_error.h"
+#include "stmt.h"
+
 
 Interpreter* Icarus::interpreter = new Interpreter(); 
 
@@ -23,13 +24,17 @@ void Icarus::run(std::string source){
     Scanner *scanner = new Scanner(source);
     std::vector<Token *> tokens = scanner->scanTokens();
     Parser<std::any>* parser = new Parser<std::any>(tokens);
-    Expr<std::any>* expression = parser->parse();
+    //Expr<std::any>* expression = parser->parse();
+
+    std::vector<Stmt<void>*> statements = parser->parse();
 
     if (hadError) return;
 
     //std::cout << (new AstPrinter())->print(expression) << std::endl;
 
-    interpreter->interpret(expression);
+    //interpreter->interpret(expression);
+
+    interpreter->interpret(statements);
 
 }
 
