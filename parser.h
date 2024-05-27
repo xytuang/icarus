@@ -218,11 +218,33 @@ Expr<R>* Parser<R>::expression() {
 }
 
 template <typename R>
-Expr<R>* Parser<R>::parse() {
-    try {
-        return expression();
-    } catch (Parser::ParseError error) {
-        return nullptr;
+Stmt<R>* Parser<R>::expressionStatement() {
+    Expr<R>* expr = expression();
+    consume(SEMICOLON, "Expect \';\' after a value");
+    return new Print<R>(expr);
+}
+
+template <typename R>
+Stmt<R>* Parser<R>::printStatement() {
+    Expr<R>* value = expression();
+    consume(SEMICOLON, "Expect \';\' after a value");
+    return new Expression<R>(value);
+}
+
+template <typename R>
+Stmt<R>* Parser<R>::statement() {
+    if (match({PRINT})) {
+        return printStatement();
     }
+    return expressionStatement();
+}
+
+template <typename R>
+std::vector<Stmt<R>*> Parser<R>::parse() {
+    std::vector<Stmt<R>*> statements;
+    while(!isAtEnd()){
+        statements.push_back(statement());
+    }
+    return statements;
 }
 #endif

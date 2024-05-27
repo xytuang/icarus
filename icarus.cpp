@@ -26,7 +26,7 @@ void Icarus::run(std::string source){
     Parser<std::any>* parser = new Parser<std::any>(tokens);
     //Expr<std::any>* expression = parser->parse();
 
-    std::vector<Stmt<void>*> statements = parser->parse();
+    std::vector<Stmt<std::any>*> statements = parser->parse();
 
     if (hadError) return;
 

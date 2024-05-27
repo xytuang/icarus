@@ -8,7 +8,7 @@
 #include "expr.h"
 #include "stmt.h"
 
-class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<void>::Visitor<void> {
+class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>::Visitor<std::any> {
     private:
         std::any evaluate(Expr<std::any>* expr);
         void execute(Stmt<void>* stmt);
@@ -26,11 +26,11 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<void>:
         std::any visitBinaryExpr(Binary<std::any>* expr);
 
 
-        void visitExpressionStmt(Expression<void>* stmt);
-        void visitPrintStmt(Print<void>* stmt);
+        std::any visitExpressionStmt(Expression<std::any>* stmt);
+        std::any visitPrintStmt(Print<std::any>* stmt);
 
 
-        void interpret(std::vector<Stmt<void> *> statements);
+        std::any interpret(std::vector<Stmt<std::any> *> statements);
         ~Interpreter() = default;
 
 };
