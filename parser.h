@@ -42,6 +42,8 @@ class Parser {
         Expr<R>* term();
         Expr<R>* comparison();
         Expr<R>* equality();
+        Expr<R>* logicalAnd();
+        Expr<R>* logicalOr();
         Expr<R>* assignment();
         Expr<R>* expression();
 
@@ -49,6 +51,7 @@ class Parser {
         Stmt<R>* expressionStatement();
         std::vector<Stmt<R>*> block();
         Stmt<R>* printStatement();
+        Stmt<R>* ifStatement();
         Stmt<R>* statement();
 
         Stmt<R>* varDeclaration();
@@ -220,8 +223,30 @@ Expr<R>* Parser<R>::equality() {
 }
 
 template <typename R>
-Expr<R>* Parser<R>::assignment() {
+Expr<R>* Parser<R>::logicalAnd() {
     Expr<R>* expr = equality();
+    while (match({AND})) {
+        Token* operation = previous();
+        Expr<R>* right = equality();
+        expr = new Logical(expr, operation, right);
+    }
+    return expr;
+}
+
+template <typename R>
+Expr<R>* Parser<R>::logicalOr() {
+    Expr<R>* expr = logicalAnd();
+    while (match({OR})) {
+        Token* operation = previous();
+        Expr<R>* right = logicalAnd();
+        expr = new Logical(expr, operation, right);
+    }
+    return expr;
+}
+
+template <typename R>
+Expr<R>* Parser<R>::assignment() {
+    Expr<R>* expr = logicalOr();
     if (match({EQUAL})) {
         Token* equals = previous();
         Expr<R>* value = assignment();
@@ -266,7 +291,24 @@ Stmt<R>* Parser<R>::printStatement() {
 }
 
 template <typename R>
+Stmt<R>* Parser<R>::ifStatement() {
+    consume(LEFT_PAREN, "Expect \'(\' after \'if\'");
+    Expr<R>* condition = expression();
+    consume(RIGHT_PAREN, "Expect \')\' after if condition");
+
+    Stmt<R>* thenBranch = statement();
+    Stmt<R>* elseBranch = nullptr;
+    if (match({ELSE})) {
+        elseBranch = statement();
+    }
+    return new If<R>(condition, thenBranch, elseBranch);
+}
+
+template <typename R>
 Stmt<R>* Parser<R>::statement() {
+    if (match({IF})) {
+        return ifStatement();
+    }
     if (match({PRINT})) {
         return printStatement();
     }

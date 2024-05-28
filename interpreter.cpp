@@ -48,7 +48,7 @@ bool Interpreter::isEqual(std::any a, std::any b) {
         return false;
     }
 
-    // Then, check the actual values based on the type
+    // check the actual values based on the type
     if (a.type() == typeid(int)) {
         return std::any_cast<int>(a) == std::any_cast<int>(b);
     } else if (a.type() == typeid(double)) {
@@ -113,28 +113,11 @@ std::string Interpreter::stringify(std::any object) {
     return "unsupported";
 }
 
-std::any Interpreter::visitLiteralExpr(Literal<std::any>* expr){
-    return expr->value;
-}
 
-std::any Interpreter::visitGroupingExpr(Grouping<std::any>* expr){
-    return evaluate(expr->expression);
-}
-
-std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
-    std::any right = evaluate(expr->right);
-    switch(expr->operation->getType()) {
-        case BANG:
-            return isTruthy(right);
-        case MINUS:
-            checkNumberOperand(expr->operation, right);
-            if (right.type() == typeid(double))
-                return -(std::any_cast<double>(right));
-            break;
-        default:
-            return nullptr;
-    }
-    return nullptr;
+std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
+    std::any value = evaluate(expr->value);
+    this->env->assign(expr->name, value);
+    return value;
 }
 
 std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
@@ -217,8 +200,57 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
     return nullptr;
 }
 
+
+
+std::any Interpreter::visitGroupingExpr(Grouping<std::any>* expr){
+    return evaluate(expr->expression);
+}
+
+std::any Interpreter::visitLiteralExpr(Literal<std::any>* expr){
+    return expr->value;
+}
+
+std::any Interpreter::visitLogicalExpr(Logical<std::any>* expr) {
+    std::any left = evaluate(expr->left);
+    if (expr->operation->getType() == OR) {
+        if (isTruthy(left)) { //short circuit and return true given that left was true
+            return left;
+        }
+    }
+    else {
+        if (!isTruthy(left)) { //short circuit given 'AND' operation and left was false
+            return left;
+        }
+    }
+    return evaluate(expr->right);
+}
+
+std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
+    std::any right = evaluate(expr->right);
+    switch(expr->operation->getType()) {
+        case BANG:
+            return isTruthy(right);
+        case MINUS:
+            checkNumberOperand(expr->operation, right);
+            if (right.type() == typeid(double))
+                return -(std::any_cast<double>(right));
+            break;
+        default:
+            return nullptr;
+    }
+    return nullptr;
+}
+
+
 std::any Interpreter::visitVariableExpr(Variable<std::any>* expr) {
     return this->env->get(expr->name);
+}
+
+//STATEMENTS
+
+std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
+    executeBlock(stmt->statements, new Environment(this->env));
+    return nullptr;
 }
 
 std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
@@ -226,15 +258,19 @@ std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
     return nullptr;
 }
 
+std::any Interpreter::visitIfStmt(If<std::any>* stmt) {
+    if (isTruthy(evaluate(stmt->condition))) {
+        execute(stmt->thenBranch);
+    }
+    else {
+        execute(stmt->elseBranch);
+    }
+    return nullptr;
+}
 
 std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
     std::any value = evaluate(stmt->expression);
     std::cout << stringify(value) << std::endl;
-    return nullptr;
-}
-
-std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
-    executeBlock(stmt->statements, new Environment(this->env));
     return nullptr;
 }
 
@@ -245,12 +281,6 @@ std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
     }
     env->define(stmt->name->getLexeme(), value);
     return nullptr;
-}
-
-std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
-    std::any value = evaluate(expr->value);
-    this->env->assign(expr->name, value);
-    return value;
 }
 
 std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {

@@ -27,20 +27,19 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
         Environment* env;
 
         Interpreter();
-
-        std::any visitLiteralExpr(Literal<std::any>* expr);
-        std::any visitGroupingExpr(Grouping<std::any>* expr);
-        std::any visitUnaryExpr(Unary<std::any>* expr);
-        std::any visitBinaryExpr(Binary<std::any>* expr);
-
-        std::any visitVariableExpr(Variable<std::any>* expr);
+        
         std::any visitAssignExpr(Assign<std::any>* expr);
-
-        std::any visitExpressionStmt(Expression<std::any>* stmt);
-        std::any visitPrintStmt(Print<std::any>* stmt);
+        std::any visitBinaryExpr(Binary<std::any>* expr);
+        std::any visitGroupingExpr(Grouping<std::any>* expr);
+        std::any visitLiteralExpr(Literal<std::any>* expr);
+        std::any visitLogicalExpr(Logical<std::any>* expr);
+        std::any visitUnaryExpr(Unary<std::any>* expr);
+        std::any visitVariableExpr(Variable<std::any>* expr);
 
         std::any visitBlockStmt(Block<std::any>* stmt);
-
+        std::any visitExpressionStmt(Expression<std::any>* stmt);
+        std::any visitIfStmt(If<std::any>* stmt);
+        std::any visitPrintStmt(Print<std::any>* stmt);
         std::any visitVarStmt(Var<std::any>* stmt);
 
 
