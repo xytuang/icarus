@@ -143,9 +143,12 @@ int main() {
     std::vector<std::string> expressionTypes = {"Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
       "Grouping : Expr<R>* expression",
       "Literal  : any value",
-      "Unary    : Token* operation, Expr<R>* right"};
+      "Unary    : Token* operation, Expr<R>* right",
+      "Variable : Token* name"};
     defineAst(outputDir, "Expr", expressionTypes);
     
-    std::vector<std::string> statementTypes = {"Expression : Expr<R>* expression", "Print : Expr<R>* expression"};
+    std::vector<std::string> statementTypes = {"Expression : Expr<R>* expression", 
+    "Print : Expr<R>* expression",
+    "Var : Token* name, Expr<R>* initializer"};
     defineAst(outputDir, "Stmt", statementTypes);
 }

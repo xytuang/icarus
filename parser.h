@@ -49,6 +49,8 @@ class Parser {
         Stmt<R>* printStatement();
         Stmt<R>* statement();
 
+        Stmt<R>* varDeclaration();
+        Stmt<R>* declaration();
 
 };
 
@@ -148,6 +150,8 @@ Expr<R>* Parser<R>::primary() {
 
     if (match({NUMBER, STRING})) return new Literal<R>(previous()->getLiteral());
 
+    if(match({IDENTIFIER})) return new Variable<R>(previous());
+
     if (match({LEFT_PAREN})) {
         Expr<R>* expr = expression();
         consume(RIGHT_PAREN, "Expect \')\' after expression.");
@@ -241,10 +245,35 @@ Stmt<R>* Parser<R>::statement() {
 }
 
 template <typename R>
+Stmt<R>* Parser<R>::varDeclaration() {
+    Token* name = consume(IDENTIFIER, "Expect variable name");
+
+    Expr<R>* initializer = nullptr;
+    if (match({EQUAL})) {
+        initializer = expression();
+    }
+
+    consume(SEMICOLON, "Expect \';\' after variable declaration.");
+    return new Var<R>(name, initializer);
+}
+
+template <typename R>
+Stmt<R>* Parser<R>::declaration() {
+    try {
+        if (match({VAR})) return varDeclaration();
+        return statement();
+    } catch(ParseError* error) {
+        synchronize();
+        return nullptr;
+    }
+}
+
+
+template <typename R>
 std::vector<Stmt<R>*> Parser<R>::parse() {
     std::vector<Stmt<R>*> statements;
     while(!isAtEnd()){
-        statements.push_back(statement());
+        statements.push_back(declaration());
     }
     return statements;
 }

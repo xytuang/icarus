@@ -10,6 +10,7 @@ template <typename R> class Binary;
 template <typename R> class Grouping;
 template <typename R> class Literal;
 template <typename R> class Unary;
+template <typename R> class Variable;
 
 template <typename R>
 class Expr{
@@ -21,6 +22,7 @@ public:
         virtual T visitGroupingExpr (Grouping<R>* expr) = 0;
         virtual T visitLiteralExpr (Literal<R>* expr) = 0;
         virtual T visitUnaryExpr (Unary<R>* expr) = 0;
+        virtual T visitVariableExpr (Variable<R>* expr) = 0;
         virtual ~Visitor() = default;
     };
 
@@ -79,6 +81,18 @@ public:
     }
     R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitUnaryExpr(this);
+    }
+};
+
+template <typename R>
+class Variable : public Expr<R> {
+public:
+    Token* name;
+    Variable(Token* name) {
+        this->name=name;
+    }
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+        return visitor->visitVariableExpr(this);
     }
 };
 

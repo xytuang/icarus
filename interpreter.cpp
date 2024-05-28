@@ -4,11 +4,17 @@
 #include <vector>
 
 #include "interpreter.h"
+#include "env.h"
 #include "expr.h"
 #include "token.h"
 #include "tokentype.h"
 #include "runtime_error.h"
 #include "icarus.h"
+
+
+Interpreter::Interpreter() {
+    this->env = new Environment();
+}
 
 std::any Interpreter::evaluate(Expr<std::any>* expr) {
     return expr->accept(this);
@@ -201,6 +207,10 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
     return nullptr;
 }
 
+std::any Interpreter::visitVariableExpr(Variable<std::any>* expr) {
+    return this->env->get(expr->name);
+}
+
 std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
     evaluate(stmt->expression);
     return nullptr;
@@ -209,10 +219,18 @@ std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
 
 std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
     std::any value = evaluate(stmt->expression);
-    std::cout <<  stringify(value) << std::endl;
+    std::cout << stringify(value) << std::endl;
     return nullptr;
 }
 
+std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
+    std::any value = nullptr;
+    if (stmt->initializer != nullptr) {
+        value = evaluate(stmt->initializer);
+    }
+    env->define(stmt->name->getLexeme(), value);
+    return nullptr;
+}
 
 std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
     try {
