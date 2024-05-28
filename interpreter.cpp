@@ -232,6 +232,12 @@ std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
     return nullptr;
 }
 
+std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
+    std::any value = evaluate(expr->value);
+    this->env->assign(expr->name, value);
+    return value;
+}
+
 std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
     try {
         for (Stmt<std::any>* stmt : statements) {

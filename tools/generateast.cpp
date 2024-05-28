@@ -140,7 +140,9 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
 int main() {
     std::string outputDir = "..";
     
-    std::vector<std::string> expressionTypes = {"Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
+    std::vector<std::string> expressionTypes = {
+      "Assign   : Token* name, Expr<R>* value",
+      "Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
       "Grouping : Expr<R>* expression",
       "Literal  : any value",
       "Unary    : Token* operation, Expr<R>* right",

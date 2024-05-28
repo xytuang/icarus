@@ -6,6 +6,7 @@
 #include "token.h"
 using namespace std;
 
+template <typename R> class Assign;
 template <typename R> class Binary;
 template <typename R> class Grouping;
 template <typename R> class Literal;
@@ -18,6 +19,7 @@ public:
     template <typename T>
     class Visitor {
     public:
+        virtual T visitAssignExpr (Assign<R>* expr) = 0;
         virtual T visitBinaryExpr (Binary<R>* expr) = 0;
         virtual T visitGroupingExpr (Grouping<R>* expr) = 0;
         virtual T visitLiteralExpr (Literal<R>* expr) = 0;
@@ -28,6 +30,20 @@ public:
 
     virtual R accept(Visitor<R>* visitor) = 0;
     virtual ~Expr() = default;
+};
+
+template <typename R>
+class Assign : public Expr<R> {
+public:
+    Token* name;
+    Expr<R>* value;
+    Assign(Token* name, Expr<R>* value) {
+        this->name=name;
+        this->value=value;
+    }
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+        return visitor->visitAssignExpr(this);
+    }
 };
 
 template <typename R>

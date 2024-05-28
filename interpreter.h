@@ -33,7 +33,7 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
         std::any visitBinaryExpr(Binary<std::any>* expr);
 
         std::any visitVariableExpr(Variable<std::any>* expr);
-
+        std::any visitAssignExpr(Assign<std::any>* expr);
 
         std::any visitExpressionStmt(Expression<std::any>* stmt);
         std::any visitPrintStmt(Print<std::any>* stmt);

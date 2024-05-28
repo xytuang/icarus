@@ -24,6 +24,16 @@ class Environment {
             throw new RuntimeError(name, "Undefined variable: " + name->getLexeme() + ".");
         }
 
+        void assign(Token* name, std::any value) {
+            if (values.find(name->getLexeme()) != values.end()) {
+                values[name->getLexeme()] = value;
+                return;
+            }
+
+            throw new RuntimeError(name, "Undefined variable: " + name->getLexeme() + ".");
+
+        }
+
         ~Environment() = default;
 };
 

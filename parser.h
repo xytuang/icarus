@@ -42,6 +42,7 @@ class Parser {
         Expr<R>* term();
         Expr<R>* comparison();
         Expr<R>* equality();
+        Expr<R>* assignment();
         Expr<R>* expression();
 
 
@@ -218,8 +219,26 @@ Expr<R>* Parser<R>::equality() {
 }
 
 template <typename R>
+Expr<R>* Parser<R>::assignment() {
+    Expr<R>* expr = equality();
+    if (match({EQUAL})) {
+        Token* equals = previous();
+        Expr<R>* value = assignment();
+
+        if (dynamic_cast<Variable<std::any>*>(expr)) {
+            Token* name = (dynamic_cast<Variable<std::any>*>(expr))->name;
+            return new Assign<R>(name, value);
+
+        }
+
+        error(equals, "Invalid assignment target.");
+    }
+    return expr;
+
+}
+template <typename R>
 Expr<R>* Parser<R>::expression() {
-    return equality();
+    return assignment();
 }
 
 template <typename R>
