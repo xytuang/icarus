@@ -122,7 +122,7 @@ Changed to:
 std::string text = source.substr(start, current - start)
 
 
-
+Working on environment to allow declaration of variables (see env.h).
 
 
 
