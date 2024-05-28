@@ -15,6 +15,7 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
 
         std::any evaluate(Expr<std::any>* expr);
         std::any execute(Stmt<std::any>* stmt);
+        std::any executeBlock(std::vector<Stmt<std::any>*> statements, Environment* environment);
 
         bool isEqual(std::any A, std::any B);
         bool isTruthy(std::any object);
@@ -37,6 +38,8 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
 
         std::any visitExpressionStmt(Expression<std::any>* stmt);
         std::any visitPrintStmt(Print<std::any>* stmt);
+
+        std::any visitBlockStmt(Block<std::any>* stmt);
 
         std::any visitVarStmt(Var<std::any>* stmt);
 

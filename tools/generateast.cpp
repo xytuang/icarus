@@ -149,7 +149,9 @@ int main() {
       "Variable : Token* name"};
     defineAst(outputDir, "Expr", expressionTypes);
     
-    std::vector<std::string> statementTypes = {"Expression : Expr<R>* expression", 
+    std::vector<std::string> statementTypes = {
+    "Block : vector<Stmt<R>*> statements",
+    "Expression : Expr<R>* expression", 
     "Print : Expr<R>* expression",
     "Var : Token* name, Expr<R>* initializer"};
     defineAst(outputDir, "Stmt", statementTypes);

@@ -12,7 +12,14 @@ class Environment {
     private:
         unordered_map<std::string, std::any> values;
     public:
-        Environment(){}
+        Environment* enclosing;
+        Environment(){
+            enclosing = nullptr;
+        }
+
+        Environment(Environment* enclosing){
+            this->enclosing = enclosing;
+        }
         void define(std::string name, std::any value) {
             values[name] = value;
         }
@@ -21,12 +28,20 @@ class Environment {
             if (values.find(name->getLexeme()) != values.end()) {
                 return values[name->getLexeme()];
             }
+            if (enclosing != nullptr) {
+                return enclosing->get(name);
+            }
             throw new RuntimeError(name, "Undefined variable: " + name->getLexeme() + ".");
         }
 
         void assign(Token* name, std::any value) {
             if (values.find(name->getLexeme()) != values.end()) {
                 values[name->getLexeme()] = value;
+                return;
+            }
+
+            if (enclosing != nullptr) {
+                enclosing->assign(name, value);
                 return;
             }
 

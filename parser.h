@@ -47,6 +47,7 @@ class Parser {
 
 
         Stmt<R>* expressionStatement();
+        std::vector<Stmt<R>*> block();
         Stmt<R>* printStatement();
         Stmt<R>* statement();
 
@@ -249,6 +250,15 @@ Stmt<R>* Parser<R>::expressionStatement() {
 }
 
 template <typename R>
+std::vector<Stmt<R>*> Parser<R>::block() {
+    std::vector<Stmt<R>*> statements;
+    while (!check(RIGHT_BRACE) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+    consume(RIGHT_BRACE, "Expect \'}\' after block.");
+    return statements;
+}
+template <typename R>
 Stmt<R>* Parser<R>::printStatement() {
     Expr<R>* value = expression();
     consume(SEMICOLON, "Expect \';\' after a value");
@@ -259,6 +269,9 @@ template <typename R>
 Stmt<R>* Parser<R>::statement() {
     if (match({PRINT})) {
         return printStatement();
+    }
+    if (match({LEFT_BRACE})) {
+        return new Block<R>(block());
     }
     return expressionStatement();
 }

@@ -25,6 +25,16 @@ std::any Interpreter::execute(Stmt<std::any>* stmt) {
     return nullptr;
 }
 
+std::any Interpreter::executeBlock(std::vector<Stmt<std::any>*> statements, Environment* environment) {
+    Environment* previous = this->env;
+    this->env = environment;
+
+    for (Stmt<std::any>* statement : statements) {
+        execute(statement);
+    }
+    this->env = previous;
+    return nullptr;
+}
 
 bool Interpreter::isEqual(std::any a, std::any b) {
     if (a.type() == typeid(std::nullptr_t) && b.type() == typeid(std::nullptr_t)) {
@@ -220,6 +230,11 @@ std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
 std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
     std::any value = evaluate(stmt->expression);
     std::cout << stringify(value) << std::endl;
+    return nullptr;
+}
+
+std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
+    executeBlock(stmt->statements, new Environment(this->env));
     return nullptr;
 }
 

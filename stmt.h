@@ -6,6 +6,7 @@
 #include "token.h"
 using namespace std;
 
+template <typename R> class Block;
 template <typename R> class Expression;
 template <typename R> class Print;
 template <typename R> class Var;
@@ -16,6 +17,7 @@ public:
     template <typename T>
     class Visitor {
     public:
+        virtual T visitBlockStmt (Block<R>* stmt) = 0;
         virtual T visitExpressionStmt (Expression<R>* stmt) = 0;
         virtual T visitPrintStmt (Print<R>* stmt) = 0;
         virtual T visitVarStmt (Var<R>* stmt) = 0;
@@ -24,6 +26,18 @@ public:
 
     virtual R accept(Visitor<R>* visitor) = 0;
     virtual ~Stmt() = default;
+};
+
+template <typename R>
+class Block : public Stmt<R> {
+public:
+    vector<Stmt<R>*> statements;
+    Block(vector<Stmt<R>*> statements) {
+        this->statements=statements;
+    }
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
+        return visitor->visitBlockStmt(this);
+    }
 };
 
 template <typename R>
