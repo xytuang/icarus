@@ -76,7 +76,7 @@ void Scanner::parseNumber() {
 
 void Scanner::identifier() {
     while (isAlphaNumeric(peek())) advance();
-    std::string text = source.substr(start, current - start); //edited
+    std::string text = source.substr(start, current - start);
     TokenType type;
     if (keywords.find(text) != keywords.end()) {
         type = keywords[text];

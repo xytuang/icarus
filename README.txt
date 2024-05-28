@@ -109,7 +109,17 @@ on an abstract syntax tree/expression. Expressions and abstract syntax trees are
 synonymous with each other.
 
 
+27 May 2024:
+Working on statements. Incorporated print statements and expression statements
+so far. Encountered bug where "print true" and "print false" would result in
+errors. Fixed the bug when I realised the error was due to incorrect scanning,
+which propagated to parsing in line 79 of scanner.cpp. Fixed line was initially:
 
+std::string text = source.substr(start, current);
+
+Changed to:
+
+std::string text = source.substr(start, current - start)
 
 
 
