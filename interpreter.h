@@ -41,7 +41,7 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
         std::any visitIfStmt(If<std::any>* stmt);
         std::any visitPrintStmt(Print<std::any>* stmt);
         std::any visitVarStmt(Var<std::any>* stmt);
-
+        std::any visitWhileStmt(While<std::any>* stmt);
 
         std::any interpret(std::vector<Stmt<std::any> *> statements);
         ~Interpreter() = default;

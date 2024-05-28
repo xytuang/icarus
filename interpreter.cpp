@@ -283,6 +283,12 @@ std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
     return nullptr;
 }
 
+std::any Interpreter::visitWhileStmt(While<std::any>* stmt) {
+    while (isTruthy(evaluate(stmt->condition))) {
+        execute(stmt->body);
+    }
+    return nullptr;
+}
 std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
     try {
         for (Stmt<std::any>* stmt : statements) {

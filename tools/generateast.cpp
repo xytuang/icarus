@@ -155,6 +155,7 @@ int main() {
     "Expression : Expr<R>* expression", 
     "If : Expr<R>* condition, Stmt<R>* thenBranch, Stmt<R>* elseBranch",
     "Print : Expr<R>* expression",
-    "Var : Token* name, Expr<R>* initializer"};
+    "Var : Token* name, Expr<R>* initializer",
+    "While : Expr<R>* condition, Stmt<R>* body"};
     defineAst(outputDir, "Stmt", statementTypes);
 }

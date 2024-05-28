@@ -50,8 +50,10 @@ class Parser {
 
         Stmt<R>* expressionStatement();
         std::vector<Stmt<R>*> block();
+        Stmt<R>* whileStatement();
         Stmt<R>* printStatement();
         Stmt<R>* ifStatement();
+        Stmt<R>* forStatement();
         Stmt<R>* statement();
 
         Stmt<R>* varDeclaration();
@@ -283,6 +285,17 @@ std::vector<Stmt<R>*> Parser<R>::block() {
     consume(RIGHT_BRACE, "Expect \'}\' after block.");
     return statements;
 }
+
+template <typename R>
+Stmt<R>* Parser<R>::whileStatement() {
+
+    consume(LEFT_PAREN, "Expect \'(\' after \'while\'");
+    Expr<R>* condition = expression();
+    consume(RIGHT_PAREN, "Expect \')\' after while condition");
+
+    Stmt<R>* body = statement();
+    return new While<R>(condition, body);
+}
 template <typename R>
 Stmt<R>* Parser<R>::printStatement() {
     Expr<R>* value = expression();
@@ -305,12 +318,69 @@ Stmt<R>* Parser<R>::ifStatement() {
 }
 
 template <typename R>
+Stmt<R>* Parser<R>::forStatement() {
+    consume(LEFT_PAREN, "Expect \'(\' after \'for\'");
+
+    Stmt<R>* initializer;
+    if (match({SEMICOLON})) {
+        initializer = nullptr;
+    }
+    else if (match({VAR})) {
+        initializer = varDeclaration();
+    }
+    else {
+        initializer = expressionStatement();
+    }
+
+    Expr<R>* condition = nullptr;
+    if (!check(SEMICOLON)) {
+        condition = expression();
+    }
+    consume(SEMICOLON, "Expect \';\' after loop condition");
+
+
+    Expr<R>* increment = nullptr;
+    if (!check(RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(RIGHT_PAREN, "Expect \')\' after for clauses");
+
+    Stmt<R>* body = statement();
+
+    if (increment != nullptr) {
+        std::vector<Stmt<R>*> statements;
+        statements.push_back(body);
+        statements.push_back(new Expression<R>(increment));
+        body = new Block<R>(statements);
+    }
+    if (condition == nullptr) {
+        condition = new Literal<R>(true);
+    }
+    body = new While<R>(condition, body);
+
+    if (initializer != nullptr) {
+        std::vector<Stmt<R>*> statements;
+        statements.push_back(initializer);
+        statements.push_back(body);
+        body = new Block<R>(statements);
+    }
+
+    return body;
+}
+
+template <typename R>
 Stmt<R>* Parser<R>::statement() {
+    if (match({FOR})) {
+        return forStatement();
+    }
     if (match({IF})) {
         return ifStatement();
     }
     if (match({PRINT})) {
         return printStatement();
+    }
+    if (match({WHILE})) {
+        return whileStatement();
     }
     if (match({LEFT_BRACE})) {
         return new Block<R>(block());

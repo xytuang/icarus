@@ -11,6 +11,7 @@ template <typename R> class Expression;
 template <typename R> class If;
 template <typename R> class Print;
 template <typename R> class Var;
+template <typename R> class While;
 
 template <typename R>
 class Stmt{
@@ -23,6 +24,7 @@ public:
         virtual T visitIfStmt (If<R>* stmt) = 0;
         virtual T visitPrintStmt (Print<R>* stmt) = 0;
         virtual T visitVarStmt (Var<R>* stmt) = 0;
+        virtual T visitWhileStmt (While<R>* stmt) = 0;
         virtual ~Visitor() = default;
     };
 
@@ -93,6 +95,20 @@ public:
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
         return visitor->visitVarStmt(this);
+    }
+};
+
+template <typename R>
+class While : public Stmt<R> {
+public:
+    Expr<R>* condition;
+    Stmt<R>* body;
+    While(Expr<R>* condition, Stmt<R>* body) {
+        this->condition=condition;
+        this->body=body;
+    }
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
+        return visitor->visitWhileStmt(this);
     }
 };
 
