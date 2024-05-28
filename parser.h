@@ -5,6 +5,8 @@
 #include <vector>
 #include <exception>
 
+#include <iostream>
+
 #include "expr.h"
 #include "tokentype.h"
 #include "stmt.h"
@@ -179,7 +181,6 @@ Expr<R>* Parser<R>::factor() {
 template <typename R>
 Expr<R>* Parser<R>::term() {
     Expr<R>* expr = factor();
-
     while(match({MINUS, PLUS})) {
         Token* operation = previous();
         Expr<R>* right = factor();
@@ -220,15 +221,15 @@ Expr<R>* Parser<R>::expression() {
 template <typename R>
 Stmt<R>* Parser<R>::expressionStatement() {
     Expr<R>* expr = expression();
-    consume(SEMICOLON, "Expect \';\' after a value");
-    return new Print<R>(expr);
+    consume(SEMICOLON, "Expect \';\' after expression");
+    return new Expression<R>(expr);
 }
 
 template <typename R>
 Stmt<R>* Parser<R>::printStatement() {
     Expr<R>* value = expression();
     consume(SEMICOLON, "Expect \';\' after a value");
-    return new Expression<R>(value);
+    return new Print<R>(value);
 }
 
 template <typename R>

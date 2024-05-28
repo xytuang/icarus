@@ -76,7 +76,7 @@ void Icarus::error(Token* token, std::string message){
         report(token->getLine(), " at end ",  message);
     }
     else {
-        report(token->getLine(), " at \'" + std::to_string(token->getLine()) + "\'", message);
+        report(token->getLine(), " at \'" + token->getLexeme() + "\'", message);
     }
 }
 void Icarus::error(int line, std::string message){

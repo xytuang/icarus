@@ -23,13 +23,13 @@ char Scanner::advance() {
     return this->source[current++];
 }
 
-void Scanner::addToken(TokenType type, std::any literal) { //ERROR SUSPECT
+void Scanner::addToken(TokenType type, std::any literal) {
     std::string text = source.substr(start, current - start);
     tokens.push_back(new Token(type, text, literal, line));
 }
 
 void Scanner::addToken(TokenType type) {
-    addToken(type, nullptr); //ERROR SUSPECT
+    addToken(type, nullptr);
 }
 
 char Scanner::peek() {
@@ -76,7 +76,7 @@ void Scanner::parseNumber() {
 
 void Scanner::identifier() {
     while (isAlphaNumeric(peek())) advance();
-    std::string text = source.substr(start, current);
+    std::string text = source.substr(start, current - start); //edited
     TokenType type;
     if (keywords.find(text) != keywords.end()) {
         type = keywords[text];
