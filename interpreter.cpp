@@ -10,7 +10,7 @@
 #include "tokentype.h"
 #include "runtime_error.h"
 #include "icarus.h"
-
+#include "icarus_callable.h"
 
 Interpreter::Interpreter() {
     this->env = new Environment();
@@ -118,6 +118,23 @@ std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
     std::any value = evaluate(expr->value);
     this->env->assign(expr->name, value);
     return value;
+}
+
+std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
+    std::any callee = evaluate(expr->callee);
+    std::vector<std::any> arguments;
+    for (int i = 0; i < expr->arguments.size(); i++) {
+        arguments.push_back(evaluate(expr->arguments[i]));
+    }
+
+    if (callee.type() != typeid(IcarusCallable)) {
+        throw new RuntimeError(expr->paren, "Can only call functions and classes");
+    }
+    IcarusCallable* function = std::any_cast<IcarusCallable>(callee);
+    if (arguments.size() != function->arity()) {
+        throw new RuntimeError(expr->paren, "Expected " + function->arity() + " arguments but got " arguments.size());
+    }
+    return function->call(this, arguments);
 }
 
 std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){

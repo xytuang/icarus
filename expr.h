@@ -8,6 +8,7 @@ using namespace std;
 
 template <typename R> class Assign;
 template <typename R> class Binary;
+template <typename R> class Call;
 template <typename R> class Grouping;
 template <typename R> class Literal;
 template <typename R> class Logical;
@@ -22,6 +23,7 @@ public:
     public:
         virtual T visitAssignExpr (Assign<R>* expr) = 0;
         virtual T visitBinaryExpr (Binary<R>* expr) = 0;
+        virtual T visitCallExpr (Call<R>* expr) = 0;
         virtual T visitGroupingExpr (Grouping<R>* expr) = 0;
         virtual T visitLiteralExpr (Literal<R>* expr) = 0;
         virtual T visitLogicalExpr (Logical<R>* expr) = 0;
@@ -61,6 +63,22 @@ public:
     }
     R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitBinaryExpr(this);
+    }
+};
+
+template <typename R>
+class Call : public Expr<R> {
+public:
+    Expr<R>* callee;
+    Token* paren;
+    vector<Expr<R>*> arguments;
+    Call(Expr<R>* callee, Token* paren, vector<Expr<R>*> arguments) {
+        this->callee=callee;
+        this->paren=paren;
+        this->arguments=arguments;
+    }
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+        return visitor->visitCallExpr(this);
     }
 };
 

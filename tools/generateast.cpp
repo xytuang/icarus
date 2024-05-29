@@ -143,6 +143,7 @@ int main() {
     std::vector<std::string> expressionTypes = {
       "Assign   : Token* name, Expr<R>* value",
       "Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
+      "Call     : Expr<R>* callee, Token* paren, vector<Expr<R>*> arguments",
       "Grouping : Expr<R>* expression",
       "Literal  : any value",
       "Logical  : Expr<R>* left, Token* operation, Expr<R>* right", 

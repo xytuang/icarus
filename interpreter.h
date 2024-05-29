@@ -29,6 +29,7 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
         Interpreter();
         
         std::any visitAssignExpr(Assign<std::any>* expr);
+        std::any visitCallExpr(Call<std::any>* expr);
         std::any visitBinaryExpr(Binary<std::any>* expr);
         std::any visitGroupingExpr(Grouping<std::any>* expr);
         std::any visitLiteralExpr(Literal<std::any>* expr);

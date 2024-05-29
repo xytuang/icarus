@@ -37,6 +37,8 @@ class Parser {
         bool match(std::initializer_list<TokenType> types);
 
         Expr<R>* primary();
+        Expr<R>* finishCall();
+        Expr<R>* call();
         Expr<R>* unary();
         Expr<R>* factor();
         Expr<R>* term();
@@ -169,13 +171,43 @@ Expr<R>* Parser<R>::primary() {
 }
 
 template <typename R>
+Expr<R>* finishCall(Expr<R>* callee) {
+    std::vector<Expr<R>*> arguments;
+    if (!check(RIGHT_PAREN)) {
+        do {
+            if (arguments.size() >= 255) {
+                error(peek(), "Can't have more than 255 arguments");
+            }
+            arguments.push_back(expression());
+        }
+        while (match({COMMA}));
+    }
+    Token* paren = consume(RIGHT_PAREN, "Expect \')\' after arguments");
+    return new Call<R>(callee, paren, arguments);
+}
+
+template <typename R>
+Expr<R>* Parser<R>::call() {
+    Expr<R>* expr = primary();
+    while (true) {
+        if (match({LEFT_PAREN})) {
+            expr = finishCall(expr);
+        }
+        else {
+            break;
+        }
+    }
+    return expr;
+}
+
+template <typename R>
 Expr<R>* Parser<R>::unary() {
     while(match({BANG, MINUS})){
         Token* operation = previous();
         Expr<R>* right = unary();
         return new Unary<R>(operation, right);
     }
-    return primary();
+    return call();
 }
 
 template <typename R>
