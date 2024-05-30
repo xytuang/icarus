@@ -147,8 +147,9 @@ while (some condition) {
 For loops are just syntactic sugar and uses similar functionality as while loops.
 They are written as such in icarus:
 
-for (var i = 0; i < 10; i += 1)
+for (var i = 0; i < 10; i += 1) {
     print i;
+}
 
 
 See samples for concrete examples. The parentheses must be present (this isn't
@@ -161,6 +162,11 @@ variable.
 
 Variable names and their values are saved in a map stored in an Environment object. 
 See env.h for details.  
+
+Scoping is also supported by using {}, allowing for multiple statements inside
+for loops, while loops, if-else, or in general if you want blocks. See class
+Block in stmt.h for details. 
+
 
 Started working on implementing functions. Functions are implemented as
 expressions (see class Call in expr.h). A function call looks like this:
