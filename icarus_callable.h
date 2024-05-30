@@ -7,8 +7,9 @@
 #include "interpreter.h"
 
 class IcarusCallable {
-    virtual int arity() = 0;
-    virtual std::any call(Interpreter* interpreter, std::vector<std::any> arguments) = 0;
-}
+    public:
+        virtual int arity() = 0;
+        virtual std::any call(Interpreter* interpreter, std::vector<std::any> arguments) = 0;
+};
 
 #endif

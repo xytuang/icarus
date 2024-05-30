@@ -130,9 +130,9 @@ std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
     if (callee.type() != typeid(IcarusCallable)) {
         throw new RuntimeError(expr->paren, "Can only call functions and classes");
     }
-    IcarusCallable* function = std::any_cast<IcarusCallable>(callee);
+    IcarusCallable* function = std::any_cast<IcarusCallable*>(callee);
     if (arguments.size() != function->arity()) {
-        throw new RuntimeError(expr->paren, "Expected " + function->arity() + " arguments but got " arguments.size());
+        throw new RuntimeError(expr->paren, "Expected " + std::to_string(function->arity()) + " arguments but got " + std::to_string(arguments.size()));
     }
     return function->call(this, arguments);
 }

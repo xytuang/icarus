@@ -125,10 +125,52 @@ std::string text = source.substr(start, current - start)
 Working on environment to allow declaration of variables (see env.h).
 
 
+29 May 2024:
+Implemented control flow  (see class If and class While in stmt.h, class Logical
+in expr.h). if-else statements are written as such in icarus:
+
+if (some_condition) {
+    ...execute code...
+}
+else {
+    ...some other code...
+}
+
+***else branch is optional.
+
+while loops are written as such in icarus:
+
+while (some condition) {
+    ...some code...
+}
+
+For loops are just syntactic sugar and uses similar functionality as while loops.
+They are written as such in icarus:
+
+for (var i = 0; i < 10; i += 1)
+    print i;
 
 
+See samples for concrete examples. The parentheses must be present (this isn't
+python). For some concrete examples of if/else and loops, see samples/loops
 
+icarus also supports defining, assigning and using variables. See class Var in
+stmt.h for initializing variables. See class Variable in expr.h for accessing
+variables. See class Assign in expr.h for assigning new values to predefined
+variable.
 
+Variable names and their values are saved in a map stored in an Environment object. 
+See env.h for details.  
+
+Started working on implementing functions. Functions are implemented as
+expressions (see class Call in expr.h). A function call looks like this:
+
+func(arg1, arg2...)
+
+To parse a function correctly, start parsing tokens from left to right. Treat
+the function name as you would an expression if there are no parentheses found
+following the function name. The number of arguments per function is limited to
+255.
 
 
 

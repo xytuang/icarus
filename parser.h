@@ -37,7 +37,7 @@ class Parser {
         bool match(std::initializer_list<TokenType> types);
 
         Expr<R>* primary();
-        Expr<R>* finishCall();
+        Expr<R>* finishCall(Expr<R>* callee);
         Expr<R>* call();
         Expr<R>* unary();
         Expr<R>* factor();
@@ -171,7 +171,7 @@ Expr<R>* Parser<R>::primary() {
 }
 
 template <typename R>
-Expr<R>* finishCall(Expr<R>* callee) {
+Expr<R>* Parser<R>::finishCall(Expr<R>* callee) {
     std::vector<Expr<R>*> arguments;
     if (!check(RIGHT_PAREN)) {
         do {
