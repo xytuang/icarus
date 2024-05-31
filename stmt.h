@@ -8,6 +8,7 @@ using namespace std;
 
 template <typename R> class Block;
 template <typename R> class Expression;
+template <typename R> class Function;
 template <typename R> class If;
 template <typename R> class Print;
 template <typename R> class Var;
@@ -21,6 +22,7 @@ public:
     public:
         virtual T visitBlockStmt (Block<R>* stmt) = 0;
         virtual T visitExpressionStmt (Expression<R>* stmt) = 0;
+        virtual T visitFunctionStmt (Function<R>* stmt) = 0;
         virtual T visitIfStmt (If<R>* stmt) = 0;
         virtual T visitPrintStmt (Print<R>* stmt) = 0;
         virtual T visitVarStmt (Var<R>* stmt) = 0;
@@ -53,6 +55,22 @@ public:
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
         return visitor->visitExpressionStmt(this);
+    }
+};
+
+template <typename R>
+class Function : public Stmt<R> {
+public:
+    Token* name;
+    vector<Token*> params;
+    vector<Stmt<R>*> body;
+    Function(Token* name, vector<Token*> params, vector<Stmt<R>*> body) {
+        this->name=name;
+        this->params=params;
+        this->body=body;
+    }
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
+        return visitor->visitFunctionStmt(this);
     }
 };
 

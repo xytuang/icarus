@@ -20,6 +20,7 @@ class Environment {
         Environment(Environment* enclosing){
             this->enclosing = enclosing;
         }
+
         void define(std::string name, std::any value) {
             values[name] = value;
         }

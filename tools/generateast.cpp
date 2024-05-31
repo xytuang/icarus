@@ -154,6 +154,7 @@ int main() {
     std::vector<std::string> statementTypes = {
     "Block : vector<Stmt<R>*> statements",
     "Expression : Expr<R>* expression", 
+    "Function : Token* name, vector<Token*> params, vector<Stmt<R>*> body",
     "If : Expr<R>* condition, Stmt<R>* thenBranch, Stmt<R>* elseBranch",
     "Print : Expr<R>* expression",
     "Var : Token* name, Expr<R>* initializer",

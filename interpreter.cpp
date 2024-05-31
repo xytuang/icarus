@@ -11,9 +11,12 @@
 #include "runtime_error.h"
 #include "icarus.h"
 #include "icarus_callable.h"
+#include "icarus_function.h"
+
 
 Interpreter::Interpreter() {
-    this->env = new Environment();
+    this->globals = new Environment();
+    this->env = globals;
 }
 
 std::any Interpreter::evaluate(Expr<std::any>* expr) {
@@ -25,16 +28,6 @@ std::any Interpreter::execute(Stmt<std::any>* stmt) {
     return nullptr;
 }
 
-std::any Interpreter::executeBlock(std::vector<Stmt<std::any>*> statements, Environment* environment) {
-    Environment* previous = this->env;
-    this->env = environment;
-
-    for (Stmt<std::any>* statement : statements) {
-        execute(statement);
-    }
-    this->env = previous;
-    return nullptr;
-}
 
 bool Interpreter::isEqual(std::any a, std::any b) {
     if (a.type() == typeid(std::nullptr_t) && b.type() == typeid(std::nullptr_t)) {
@@ -113,6 +106,16 @@ std::string Interpreter::stringify(std::any object) {
     return "unsupported";
 }
 
+std::any Interpreter::executeBlock(std::vector<Stmt<std::any>*> statements, Environment* environment) {
+    Environment* previous = this->env;
+    this->env = environment;
+
+    for (Stmt<std::any>* statement : statements) {
+        execute(statement);
+    }
+    this->env = previous;
+    return nullptr;
+}
 
 std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
     std::any value = evaluate(expr->value);
@@ -272,6 +275,13 @@ std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
 
 std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
     evaluate(stmt->expression);
+    return nullptr;
+}
+
+
+std::any Interpreter::visitFunctionStmt(Function<std::any>* stmt) {
+    IcarusFunction<std::any>* function = new IcarusFunction<std::any>(stmt);
+    this->env->define(stmt->name->getLexeme(), function);
     return nullptr;
 }
 

@@ -51,6 +51,7 @@ class Parser {
 
 
         Stmt<R>* expressionStatement();
+        Stmt<R>* function(std::string kind);
         std::vector<Stmt<R>*> block();
         Stmt<R>* whileStatement();
         Stmt<R>* printStatement();
@@ -302,6 +303,28 @@ Expr<R>* Parser<R>::expression() {
 }
 
 template <typename R>
+Stmt<R>* Parser<R>::function(std::string kind) {
+    Token* name = consume(IDENTIFIER, "Expect " + kind + " name.");
+    std::vector<Token*> parameters;
+    if (!check(RIGHT_PAREN)) {
+        do {
+            if (parameters.size() >= 255) {
+                error(peek(), "Can't have more than 255 parameters");
+            }
+            parameters.push_back(consume(IDENTIFIER, "Expect parameter name."));
+        } while (match({COMMA}));
+    }
+    consume(RIGHT_PAREN, "Expect \')\' after parameters");
+
+    consume(LEFT_BRACE, "Expect \'{\' before " + kind + " body.");
+    std::vector<Stmt<R>*> body = block();
+    return new Function<R>(name, parameters, body);
+}
+
+
+
+
+template <typename R>
 Stmt<R>* Parser<R>::expressionStatement() {
     Expr<R>* expr = expression();
     consume(SEMICOLON, "Expect \';\' after expression");
@@ -436,6 +459,7 @@ Stmt<R>* Parser<R>::varDeclaration() {
 template <typename R>
 Stmt<R>* Parser<R>::declaration() {
     try {
+        if (match({FUN})) return function("function");
         if (match({VAR})) return varDeclaration();
         return statement();
     } catch(ParseError* error) {
