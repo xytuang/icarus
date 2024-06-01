@@ -305,6 +305,7 @@ Expr<R>* Parser<R>::expression() {
 template <typename R>
 Stmt<R>* Parser<R>::function(std::string kind) {
     Token* name = consume(IDENTIFIER, "Expect " + kind + " name.");
+    consume(LEFT_PAREN, "Expect \'(\' after " + kind + " name.");
     std::vector<Token*> parameters;
     if (!check(RIGHT_PAREN)) {
         do {

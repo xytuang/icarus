@@ -10,7 +10,7 @@
 #include "env.h"
 
 template <typename R>
-class IcarusFunction : IcarusCallable {
+class IcarusFunction : public IcarusCallable {
     private:
         Function<R>* declaration;
     public:
