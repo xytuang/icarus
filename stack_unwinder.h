@@ -12,7 +12,7 @@ class StackUnwinder : std::exception {
         }
 
         const char* what() const noexcept override {
-            return "";
+            return "Unwinding stack";
         }
         
 };
