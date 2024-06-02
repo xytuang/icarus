@@ -28,6 +28,19 @@ std::any Interpreter::execute(Stmt<std::any>* stmt) {
     return nullptr;
 }
 
+void Interpreter::resolve(Expr<std::any>* expr, int depth) {
+    this->locals[expr] = depth;
+}
+
+std::any Interpreter::lookupVariable(Token* name, Expr<std::any>* expr) {
+    if (this->locals.find(expr) != this->locals.end()) {
+        int distance = this->locals[expr];
+        return this->env->getAt(distance, name->getLexeme());
+    }
+    else {
+        return this->globals->get(name);
+    }
+}
 
 bool Interpreter::isEqual(std::any a, std::any b) {
     if (a.type() == typeid(std::nullptr_t) && b.type() == typeid(std::nullptr_t)) {
@@ -119,7 +132,13 @@ std::any Interpreter::executeBlock(std::vector<Stmt<std::any>*> statements, Envi
 
 std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
     std::any value = evaluate(expr->value);
-    this->env->assign(expr->name, value);
+    if (this->locals.find(expr) != this->locals.end()) {
+        int distance = this->locals[expr];
+        this->env->assignAt(distance, expr->name, value);
+    }
+    else {
+        this->globals->assign(expr->name, value);
+    }
     return value;
 }
 
@@ -268,7 +287,7 @@ std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
 
 
 std::any Interpreter::visitVariableExpr(Variable<std::any>* expr) {
-    return this->env->get(expr->name);
+    return lookupVariable(expr->name, expr);
 }
 
 //STATEMENTS

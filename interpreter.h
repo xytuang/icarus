@@ -4,6 +4,7 @@
 #include <any>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "expr.h"
 #include "stmt.h"
@@ -15,6 +16,7 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
 
         std::any evaluate(Expr<std::any>* expr);
         std::any execute(Stmt<std::any>* stmt);
+        std::any lookupVariable(Token* name, Expr<std::any>* expr);
 
         bool isEqual(std::any A, std::any B);
         bool isTruthy(std::any object);
@@ -25,10 +27,13 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
     public:
         Environment* env;
         Environment* globals;
+        unordered_map<Expr<std::any>*, int> locals;
 
         Interpreter();
         
+        void resolve(Expr<std::any>* expr, int depth);
         std::any executeBlock(std::vector<Stmt<std::any>*> statements, Environment* environment);
+
 
         std::any visitAssignExpr(Assign<std::any>* expr);
         std::any visitCallExpr(Call<std::any>* expr);
