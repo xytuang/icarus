@@ -11,6 +11,7 @@ template <typename R> class Expression;
 template <typename R> class Function;
 template <typename R> class If;
 template <typename R> class Print;
+template <typename R> class Return;
 template <typename R> class Var;
 template <typename R> class While;
 
@@ -25,6 +26,7 @@ public:
         virtual T visitFunctionStmt (Function<R>* stmt) = 0;
         virtual T visitIfStmt (If<R>* stmt) = 0;
         virtual T visitPrintStmt (Print<R>* stmt) = 0;
+        virtual T visitReturnStmt (Return<R>* stmt) = 0;
         virtual T visitVarStmt (Var<R>* stmt) = 0;
         virtual T visitWhileStmt (While<R>* stmt) = 0;
         virtual ~Visitor() = default;
@@ -99,6 +101,20 @@ public:
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
         return visitor->visitPrintStmt(this);
+    }
+};
+
+template <typename R>
+class Return : public Stmt<R> {
+public:
+    Token* keyword;
+    Expr<R>* value;
+    Return(Token* keyword, Expr<R>* value) {
+        this->keyword=keyword;
+        this->value=value;
+    }
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
+        return visitor->visitReturnStmt(this);
     }
 };
 

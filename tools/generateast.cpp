@@ -157,6 +157,7 @@ int main() {
     "Function : Token* name, vector<Token*> params, vector<Stmt<R>*> body",
     "If : Expr<R>* condition, Stmt<R>* thenBranch, Stmt<R>* elseBranch",
     "Print : Expr<R>* expression",
+    "Return : Token* keyword, Expr<R>* value",
     "Var : Token* name, Expr<R>* initializer",
     "While : Expr<R>* condition, Stmt<R>* body"};
     defineAst(outputDir, "Stmt", statementTypes);

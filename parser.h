@@ -54,6 +54,7 @@ class Parser {
         Stmt<R>* function(std::string kind);
         std::vector<Stmt<R>*> block();
         Stmt<R>* whileStatement();
+        Stmt<R>* returnStatement();
         Stmt<R>* printStatement();
         Stmt<R>* ifStatement();
         Stmt<R>* forStatement();
@@ -352,6 +353,17 @@ Stmt<R>* Parser<R>::whileStatement() {
     Stmt<R>* body = statement();
     return new While<R>(condition, body);
 }
+
+template <typename R>
+Stmt<R>* Parser<R>::returnStatement() {
+    Token* keyword = previous();
+    Expr<R>* value = nullptr;
+    if (!check(SEMICOLON)) {
+        value = expression();
+    }
+    consume(SEMICOLON, "Expect \';\' after return value");
+    return new Return<R>(keyword, value);
+}
 template <typename R>
 Stmt<R>* Parser<R>::printStatement() {
     Expr<R>* value = expression();
@@ -434,6 +446,9 @@ Stmt<R>* Parser<R>::statement() {
     }
     if (match({PRINT})) {
         return printStatement();
+    }
+    if (match({RETURN})) {
+        return returnStatement();
     }
     if (match({WHILE})) {
         return whileStatement();

@@ -8,6 +8,7 @@
 #include "stmt.h"
 #include "interpreter.h"
 #include "env.h"
+#include "stack_unwinder.h"
 
 template <typename R>
 class IcarusFunction : public IcarusCallable {
@@ -27,7 +28,11 @@ class IcarusFunction : public IcarusCallable {
             for (int i = 0; i < this->declaration->params.size(); i++) {
                 environment->define(this->declaration->params[i]->getLexeme(), arguments[i]);
             }
-            interpreter->executeBlock(this->declaration->body, environment);
+            try {
+                interpreter->executeBlock(this->declaration->body, environment);
+            } catch (StackUnwinder* returnValue) {
+                return returnValue->value;
+            }
             return nullptr;
         }
 

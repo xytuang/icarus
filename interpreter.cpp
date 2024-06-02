@@ -12,7 +12,7 @@
 #include "icarus.h"
 #include "icarus_callable.h"
 #include "icarus_function.h"
-
+#include "stack_unwinder.h"
 
 Interpreter::Interpreter() {
     this->globals = new Environment();
@@ -304,6 +304,14 @@ std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
     std::any value = evaluate(stmt->expression);
     std::cout << stringify(value) << std::endl;
     return nullptr;
+}
+
+std::any Interpreter::visitReturnStmt(Return<std::any>* stmt) {
+    std::any value = nullptr;
+    if (stmt->value != nullptr) {
+        value = evaluate(stmt->value);
+    }
+    throw new StackUnwinder(value);
 }
 
 std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
