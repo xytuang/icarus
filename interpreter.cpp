@@ -285,7 +285,7 @@ std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
 
 
 std::any Interpreter::visitFunctionStmt(Function<std::any>* stmt) {
-    IcarusFunction<std::any>* function = new IcarusFunction<std::any>(stmt);
+    IcarusFunction<std::any>* function = new IcarusFunction<std::any>(stmt, this->env);
     this->env->define(stmt->name->getLexeme(), function);
     return nullptr;
 }

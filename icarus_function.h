@@ -15,8 +15,10 @@ template <typename R>
 class IcarusFunction : public IcarusCallable {
     private:
         Function<R>* declaration;
+        Environment* closure;
     public:
-        IcarusFunction(Function<R>* declaration) {
+        IcarusFunction(Function<R>* declaration, Environment* closure) {
+            this->closure = closure;
             this->declaration = declaration;
         }
 
@@ -25,7 +27,7 @@ class IcarusFunction : public IcarusCallable {
         }
 
         std::any call(Interpreter* interpreter, std::vector<std::any> arguments) {
-            Environment* environment = new Environment(interpreter->globals);
+            Environment* environment = new Environment(this->closure);
             for (int i = 0; i < this->declaration->params.size(); i++) {
                 environment->define(this->declaration->params[i]->getLexeme(), arguments[i]);
             }
