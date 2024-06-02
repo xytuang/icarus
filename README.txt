@@ -181,3 +181,16 @@ following the function name. The number of arguments per function is limited to
 
 
 
+1 June 2024:
+Implemented return statements and closures. Closures started making sense when I
+implemented them (also because it was particularly easy to implement). Closures
+just hold on to surrounding variables where the function is declared. The
+implementation was to have an Environment member variable for each function that
+held onto surrounding variables. 
+
+Return statements were particularly interesting, especially when you consider
+what should happen in a recursive function. The stack needs to unwind, and so
+the idea was to piggback of an exception that would unwind the stack but not 
+throw an exception. 
+
+
