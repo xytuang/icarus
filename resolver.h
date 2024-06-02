@@ -8,12 +8,15 @@
 #include "expr.h"
 #include "stmt.h"
 #include "interpreter.h"
+#include "enums.h"
 
 class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>::Visitor<std::any> {
     private:
         Interpreter* interpreter;
 
         std::vector<std::unordered_map<std::string, bool>> scopes;
+
+        FunctionType currentFunction = NONE;
 
         void resolve(Expr<std::any>* expr);
 
@@ -25,7 +28,7 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
 
         void resolveLocal(Expr<std::any>* expr, Token* name);
 
-        void resolveFunction(Function<std::any>* function);
+        void resolveFunction(Function<std::any>* function, FunctionType type);
 
         void beginScope();
 

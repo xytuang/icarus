@@ -31,7 +31,7 @@ void Icarus::run(std::string source){
 
     Resolver* resolver = new Resolver(interpreter);
     resolver->resolve(statements);
-
+    if (hadError) return;
     interpreter->interpret(statements);
 
 }

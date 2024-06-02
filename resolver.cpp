@@ -8,6 +8,7 @@
 #include "resolver.h"
 #include "interpreter.h"
 #include "icarus.h"
+#include "enums.h"
 
 Resolver::Resolver(Interpreter* interpreter) {
     this->interpreter = interpreter;
@@ -35,6 +36,9 @@ void Resolver::declare(Token* name) {
         return;
     }
     unordered_map<std::string, bool> scope = this->scopes.back();
+    if (scope.find(name->getLexeme()) != scope.end()) {
+        Icarus::error(name, "Already a variable with this name in this scope");
+    }
     scope[name->getLexeme()] = false;
     return;
 }
@@ -55,7 +59,11 @@ void Resolver::resolveLocal(Expr<std::any>* expr, Token* name) {
     }
 }
 
-void Resolver::resolveFunction(Function<std::any>* function) {
+void Resolver::resolveFunction(Function<std::any>* function, FunctionType type) {
+    // handle rogue return statements
+    FunctionType enclosingFunction = this->currentFunction;
+    this->currentFunction = type;
+
     beginScope();
     for (Token* param : function->params) {
         declare(param);
@@ -63,6 +71,7 @@ void Resolver::resolveFunction(Function<std::any>* function) {
     }
     resolve(function->body);
     endScope();
+    currentFunction = enclosingFunction;
 }
 
 void Resolver::beginScope() {
@@ -95,7 +104,7 @@ std::any Resolver::visitFunctionStmt(Function<std::any>* stmt) {
     declare(stmt->name);
     define(stmt->name);
 
-    resolveFunction(stmt);
+    resolveFunction(stmt, FUNCTION);
     return nullptr;
 }
 
@@ -121,6 +130,9 @@ std::any Resolver::visitPrintStmt(Print<std::any>* stmt) {
 }
 
 std::any Resolver::visitReturnStmt(Return<std::any>* stmt) {
+    if (this->currentFunction == NONE) {
+        Icarus::error(stmt->keyword, "Can't return from top level code");
+    }
     if (stmt->value != nullptr) {
         resolve(stmt->value);
     }
