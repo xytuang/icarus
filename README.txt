@@ -193,4 +193,37 @@ what should happen in a recursive function. The stack needs to unwind, and so
 the idea was to piggback of an exception that would unwind the stack but not 
 throw an exception. 
 
+2 June 2024:
+Implemented resolutions and bindings. Previously, this code would not resolve
+properly:
 
+var a = "global"
+{
+    fun showA() {
+        print a;
+    }
+
+    showA();
+    var a = "block";
+    showA();
+}
+
+The code should output "global" two times, each time on a separate line.
+However, we get "global" once and then "block". This bug occurs because of the
+way we declare functions. Without resolution/binding, the environments that
+functions exist in are dynamic (aka they can differ as more variables are
+declared). Instead, the environment should be static/unchanging. 
+
+Implementation process of resolution. Resolution is a single pass over the
+abstract syntax trees after parsing and right before interpretation. In that
+pass, we are interested in several things:
+1. Block statement introduces a new scope for the statements inside it.
+2. Function declaration introduces new scope for its body and binds its
+paramters to that scope.
+3. Variable declaration adds new variable to current scope.
+4. Variable and assignment expressions need to have their variables resolved.
+
+To achieve a static environment, we map each variable/expression to a certain
+environment. Since environments are nested within each other, we just need to
+find out how many levels/environments up we need to go. Then everytime we use
+that variable, we know where to look for its value. 
