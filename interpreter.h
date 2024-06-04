@@ -45,6 +45,7 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
         std::any visitVariableExpr(Variable<std::any>* expr);
 
         std::any visitBlockStmt(Block<std::any>* stmt);
+        std::any visitClassStmt(Class<std::any>* stmt);
         std::any visitExpressionStmt(Expression<std::any>* stmt);
         std::any visitFunctionStmt(Function<std::any>* stmt); 
         std::any visitIfStmt(If<std::any>* stmt);

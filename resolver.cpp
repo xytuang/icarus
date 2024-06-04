@@ -91,6 +91,12 @@ std::any Resolver::visitBlockStmt(Block<std::any>* stmt) {
     return nullptr;
 }
 
+std::any Resolver::visitClassStmt(Class<std::any>* stmt) {
+    declare(stmt->name);
+    define(stmt->name);
+    return nullptr;
+}
+
 std::any Resolver::visitVarStmt(Var<std::any>* stmt) {
     declare(stmt->name);
     if (stmt->initializer != nullptr) {

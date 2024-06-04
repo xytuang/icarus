@@ -5,10 +5,10 @@
 #include <any>
 #include "token.h"
 #include "expr.h"
-
 using namespace std;
 
 template <typename R> class Block;
+template <typename R> class Class;
 template <typename R> class Expression;
 template <typename R> class Function;
 template <typename R> class If;
@@ -24,6 +24,7 @@ public:
     class Visitor {
     public:
         virtual T visitBlockStmt (Block<R>* stmt) = 0;
+        virtual T visitClassStmt (Class<R>* stmt) = 0;
         virtual T visitExpressionStmt (Expression<R>* stmt) = 0;
         virtual T visitFunctionStmt (Function<R>* stmt) = 0;
         virtual T visitIfStmt (If<R>* stmt) = 0;
@@ -47,6 +48,20 @@ public:
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
         return visitor->visitBlockStmt(this);
+    }
+};
+
+template <typename R>
+class Class : public Stmt<R> {
+public:
+    Token* name;
+    vector<Stmt<R>*> methods;
+    Class(Token* name, vector<Stmt<R>*> methods) {
+        this->name=name;
+        this->methods=methods;
+    }
+    R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
+        return visitor->visitClassStmt(this);
     }
 };
 

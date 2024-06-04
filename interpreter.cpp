@@ -13,6 +13,7 @@
 #include "icarus_callable.h"
 #include "icarus_function.h"
 #include "stack_unwinder.h"
+#include "icarus_class.h"
 
 Interpreter::Interpreter() {
     this->globals = new Environment();
@@ -148,20 +149,24 @@ std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
     for (int i = 0; i < expr->arguments.size(); i++) {
         arguments.push_back(evaluate(expr->arguments[i]));
     }
-    IcarusCallable* function;
-    try {
+    IcarusCallable* callObject;
+
+    if (callee.type() == typeid(IcarusFunction<std::any>*)) {
         IcarusFunction<std::any>* functionPtr = std::any_cast<IcarusFunction<std::any>*>(callee);
-        function = dynamic_cast<IcarusCallable*>(functionPtr);
-        /*
-        function = std::any_cast<IcarusFunction*>(callee);
-        */
-    } catch (const std::bad_any_cast& e) {
+        callObject = dynamic_cast<IcarusCallable*>(functionPtr);
+    }
+    
+    else if (callee.type() == typeid(IcarusClass*)) {
+        IcarusClass* classPtr = std::any_cast<IcarusClass*>(callee);
+        callObject = dynamic_cast<IcarusCallable*>(classPtr);
+    }
+    else {
         throw new RuntimeError(expr->paren, "Can only call functions and classes");
     }
-    if (arguments.size() != function->arity()) {
-        throw new RuntimeError(expr->paren, "Expected " + std::to_string(function->arity()) + " arguments but got " + std::to_string(arguments.size()));
+    if (arguments.size() != callObject->arity()) {
+        throw new RuntimeError(expr->paren, "Expected " + std::to_string(callObject->arity()) + " arguments but got " + std::to_string(arguments.size()));
     }
-    return function->call(this, arguments);
+    return callObject->call(this, arguments);
 }
 
 std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
@@ -294,6 +299,13 @@ std::any Interpreter::visitVariableExpr(Variable<std::any>* expr) {
 
 std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
     executeBlock(stmt->statements, new Environment(this->env));
+    return nullptr;
+}
+
+std::any Interpreter::visitClassStmt(Class<std::any>* stmt) {
+    this->env->define(stmt->name->getLexeme(), nullptr);
+    IcarusClass* klass = new IcarusClass(stmt->name->getLexeme());
+    this->env->assign(stmt->name, klass);
     return nullptr;
 }
 

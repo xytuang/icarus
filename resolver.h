@@ -42,6 +42,8 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
 
         std::any visitBlockStmt(Block<std::any>* stmt);
 
+        std::any visitClassStmt(Class<std::any>* stmt);
+
         std::any visitVarStmt(Var<std::any>* stmt);
 
         std::any visitFunctionStmt(Function<std::any>* stmt);

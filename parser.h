@@ -60,6 +60,8 @@ class Parser {
         Stmt<R>* forStatement();
         Stmt<R>* statement();
 
+        Stmt<R>* classDeclaration();
+
         Stmt<R>* varDeclaration();
         Stmt<R>* declaration();
 
@@ -460,6 +462,19 @@ Stmt<R>* Parser<R>::statement() {
 }
 
 template <typename R>
+Stmt<R>* Parser<R>::classDeclaration() {
+    Token* name = consume(IDENTIFIER, "Expect class name");
+    consume(LEFT_BRACE, "Expect { before class declaration");
+    std::vector<Stmt<R>*> methods;
+    while(!check(RIGHT_BRACE) && !isAtEnd()) {
+        methods.push_back(function("method"));
+    }
+
+    consume(RIGHT_BRACE, "Expect } before class declaration");
+    return new Class(name, methods);
+}
+
+template <typename R>
 Stmt<R>* Parser<R>::varDeclaration() {
     Token* name = consume(IDENTIFIER, "Expect variable name");
 
@@ -475,6 +490,7 @@ Stmt<R>* Parser<R>::varDeclaration() {
 template <typename R>
 Stmt<R>* Parser<R>::declaration() {
     try {
+        if (match({CLASS})) return classDeclaration();
         if (match({FUN})) return function("function");
         if (match({VAR})) return varDeclaration();
         return statement();
