@@ -40,7 +40,7 @@ class IcarusFunction : public IcarusCallable {
         }
 
         std::string toString() {
-            return "<fn " + this->declaration->name->lexeme + ">";
+            return "<fn " + this->declaration->name->getLexeme() + ">";
         }
 };
 

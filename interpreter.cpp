@@ -14,6 +14,7 @@
 #include "icarus_function.h"
 #include "stack_unwinder.h"
 #include "icarus_class.h"
+#include "icarus_instance.h"
 
 Interpreter::Interpreter() {
     this->globals = new Environment();
@@ -108,7 +109,6 @@ std::string Interpreter::stringify(std::any object) {
         }
         return text;
     }
-
     else if (object.type() == typeid(std::string)) {
         return std::any_cast<std::string>(object);
     }
@@ -116,6 +116,11 @@ std::string Interpreter::stringify(std::any object) {
     else if(object.type() == typeid(bool)) {
         bool value = std::any_cast<bool>(object);
         return std::to_string(value);
+    }
+
+    else if (object.type() == typeid(IcarusInstance*)){
+        IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
+        return instance->toString();
     }
     return "unsupported";
 }
