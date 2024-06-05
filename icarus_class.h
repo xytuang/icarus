@@ -3,19 +3,28 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <any>
 
 #include "icarus_callable.h"
 #include "interpreter.h"
+#include "icarus_function.h"
 
 class IcarusClass : public IcarusCallable {
     public:
         std::string name;
-        IcarusClass(std::string name);
+        unordered_map<std::string, IcarusFunction<std::any>*> methods;
+
+        IcarusClass(std::string name, unordered_map<std::string, IcarusFunction<std::any>*> methods);
 
         std::string toString();
 
         int arity();
+
         std::any call(Interpreter* interpreter, std::vector<std::any> arguments);
+
+        IcarusFunction<std::any>* findMethod(std::string name);
+
 };
 
 

@@ -18,6 +18,10 @@ std::any IcarusInstance::get(Token* name) {
     if (this->fields.find(name->getLexeme()) != this->fields.end()) {
         return this->fields[name->getLexeme()];
     }
+    IcarusFunction<std::any>* method = this->klass->findMethod(name->getLexeme());
+    if (method != nullptr) {
+        return method;
+    }
     throw new RuntimeError(name, "Undefined property: " + name->getLexeme() + ".");
 }
 

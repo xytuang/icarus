@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 #include "interpreter.h"
 #include "env.h"
@@ -330,7 +331,12 @@ std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
 
 std::any Interpreter::visitClassStmt(Class<std::any>* stmt) {
     this->env->define(stmt->name->getLexeme(), nullptr);
-    IcarusClass* klass = new IcarusClass(stmt->name->getLexeme());
+    unordered_map<std::string, IcarusFunction<std::any>*> methods;
+    for (Stmt<std::any>* method : stmt->methods) {
+        IcarusFunction<std::any>* function = new IcarusFunction(dynamic_cast<Function<std::any>*>(method), this->env);
+        methods[dynamic_cast<Function<std::any>*>(method)->name->getLexeme()] = function;
+    }
+    IcarusClass* klass = new IcarusClass(stmt->name->getLexeme(), methods);
     this->env->assign(stmt->name, klass);
     return nullptr;
 }

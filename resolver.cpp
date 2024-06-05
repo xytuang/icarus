@@ -94,6 +94,11 @@ std::any Resolver::visitBlockStmt(Block<std::any>* stmt) {
 std::any Resolver::visitClassStmt(Class<std::any>* stmt) {
     declare(stmt->name);
     define(stmt->name);
+
+    for (Stmt<std::any>* method : stmt->methods) {
+        FunctionType declaration = METHOD;
+        resolveFunction(dynamic_cast<Function<std::any>*>(method), declaration);
+    }
     return nullptr;
 }
 
