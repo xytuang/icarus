@@ -174,6 +174,14 @@ std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
     return callObject->call(this, arguments);
 }
 
+std::any Interpreter::visitGetExpr(Get<std::any>* expr) {
+    std::any object = evaluate(expr->object);
+    if (object.type() == typeid(IcarusInstance*)) {
+        IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
+        return instance->get(expr->name);
+    }
+    throw new RuntimeError(expr->name, "Only instances have properties");
+}
 std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
     std::any left = evaluate(expr->left);
     std::any right = evaluate(expr->right);
@@ -277,6 +285,19 @@ std::any Interpreter::visitLogicalExpr(Logical<std::any>* expr) {
         }
     }
     return evaluate(expr->right);
+}
+
+std::any Interpreter::visitSetExpr(Set<std::any>* expr) {
+    std::any object = evaluate(expr->object);
+
+    if (object.type() != typeid(IcarusInstance*)) {
+        throw new RuntimeError(expr->name, "Only instances have fields");
+    }
+    std::any value = evaluate(expr->value);
+    IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
+    instance->set(expr->name, value);
+    return value;
+
 }
 
 std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){

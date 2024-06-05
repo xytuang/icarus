@@ -197,6 +197,10 @@ Expr<R>* Parser<R>::call() {
         if (match({LEFT_PAREN})) {
             expr = finishCall(expr);
         }
+        else if (match({DOT})) {
+            Token* name = consume(IDENTIFIER, "Expect property name after \'.\'");
+            expr = new Get<std::any>(expr, name);
+        }
         else {
             break;
         }
@@ -288,11 +292,13 @@ Expr<R>* Parser<R>::assignment() {
     if (match({EQUAL})) {
         Token* equals = previous();
         Expr<R>* value = assignment();
-
         if (dynamic_cast<Variable<std::any>*>(expr)) {
             Token* name = (dynamic_cast<Variable<std::any>*>(expr))->name;
             return new Assign<R>(name, value);
-
+        }
+        else if (dynamic_cast<Get<std::any>*>(expr)) {
+            Get<std::any>* get = dynamic_cast<Get<std::any>*>(expr);
+            return new Set<R>(get->object, get->name, value);
         }
 
         error(equals, "Invalid assignment target.");

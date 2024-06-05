@@ -180,6 +180,10 @@ std::any Resolver::visitCallExpr(Call<std::any>* expr) {
     return nullptr;
 }
 
+std::any Resolver::visitGetExpr(Get<std::any>* expr) {
+    resolve(expr->object);
+    return nullptr;
+}
 
 std::any Resolver::visitGroupingExpr(Grouping<std::any>* expr) {
     resolve(expr->expression);
@@ -198,7 +202,11 @@ std::any Resolver::visitLogicalExpr(Logical<std::any>* expr) {
     return nullptr;
 }
 
-
+std::any Resolver::visitSetExpr(Set<std::any>* expr) {
+    resolve(expr->value);
+    resolve(expr->object);
+    return nullptr;
+}
 std::any Resolver::visitUnaryExpr(Unary<std::any>* expr) {
     resolve(expr->right);
     return nullptr;

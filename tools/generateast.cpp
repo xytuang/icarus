@@ -144,9 +144,11 @@ int main() {
       "Assign   : Token* name, Expr<R>* value",
       "Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
       "Call     : Expr<R>* callee, Token* paren, vector<Expr<R>*> arguments",
+      "Get      : Expr<R>* object, Token* name",
       "Grouping : Expr<R>* expression",
       "Literal  : any value",
       "Logical  : Expr<R>* left, Token* operation, Expr<R>* right", 
+      "Set      : Expr<R>* object, Token* name, Expr<R>* value",
       "Unary    : Token* operation, Expr<R>* right",
       "Variable : Token* name"};
     defineAst(outputDir, "Expr", expressionTypes);

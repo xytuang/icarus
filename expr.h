@@ -9,9 +9,11 @@ using namespace std;
 template <typename R> class Assign;
 template <typename R> class Binary;
 template <typename R> class Call;
+template <typename R> class Get;
 template <typename R> class Grouping;
 template <typename R> class Literal;
 template <typename R> class Logical;
+template <typename R> class Set;
 template <typename R> class Unary;
 template <typename R> class Variable;
 
@@ -24,9 +26,11 @@ public:
         virtual T visitAssignExpr (Assign<R>* expr) = 0;
         virtual T visitBinaryExpr (Binary<R>* expr) = 0;
         virtual T visitCallExpr (Call<R>* expr) = 0;
+        virtual T visitGetExpr (Get<R>* expr) = 0;
         virtual T visitGroupingExpr (Grouping<R>* expr) = 0;
         virtual T visitLiteralExpr (Literal<R>* expr) = 0;
         virtual T visitLogicalExpr (Logical<R>* expr) = 0;
+        virtual T visitSetExpr (Set<R>* expr) = 0;
         virtual T visitUnaryExpr (Unary<R>* expr) = 0;
         virtual T visitVariableExpr (Variable<R>* expr) = 0;
         virtual ~Visitor() = default;
@@ -83,6 +87,20 @@ public:
 };
 
 template <typename R>
+class Get : public Expr<R> {
+public:
+    Expr<R>* object;
+    Token* name;
+    Get(Expr<R>* object, Token* name) {
+        this->object=object;
+        this->name=name;
+    }
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+        return visitor->visitGetExpr(this);
+    }
+};
+
+template <typename R>
 class Grouping : public Expr<R> {
 public:
     Expr<R>* expression;
@@ -119,6 +137,22 @@ public:
     }
     R accept(typename Expr<R>::template Visitor<R>* visitor) override {
         return visitor->visitLogicalExpr(this);
+    }
+};
+
+template <typename R>
+class Set : public Expr<R> {
+public:
+    Expr<R>* object;
+    Token* name;
+    Expr<R>* value;
+    Set(Expr<R>* object, Token* name, Expr<R>* value) {
+        this->object=object;
+        this->name=name;
+        this->value=value;
+    }
+    R accept(typename Expr<R>::template Visitor<R>* visitor) override {
+        return visitor->visitSetExpr(this);
     }
 };
 

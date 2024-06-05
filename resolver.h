@@ -67,12 +67,16 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
         std::any visitBinaryExpr(Binary<std::any>* expr);
 
         std::any visitCallExpr(Call<std::any>* expr);
+
+        std::any visitGetExpr(Get<std::any>* expr);
  
         std::any visitGroupingExpr(Grouping<std::any>* expr);
 
         std::any visitLiteralExpr(Literal<std::any>* expr);
 
         std::any visitLogicalExpr(Logical<std::any>* expr);
+
+        std::any visitSetExpr(Set<std::any>* expr);
 
         std::any visitUnaryExpr(Unary<std::any>* expr);
 };
