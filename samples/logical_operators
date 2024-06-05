@@ -1,0 +1,7 @@
+print "hi" or 2;
+print nil or "yes";
+
+if (false)
+    print "true";
+else
+    print "false";

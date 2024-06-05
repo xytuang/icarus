@@ -1,0 +1,20 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -g
+LDFLAGS = -rdynamic
+
+SRCS = main.cpp icarus.cpp token.cpp scanner.cpp interpreter.cpp resolver.cpp icarus_class.cpp icarus_instance.cpp
+OBJS = ${SRCS:.cpp=.o}
+HEADERS = 
+
+MAIN = main
+
+all: ${MAIN}
+
+${MAIN}: ${OBJS}
+	${CXX} ${LDFLAGS} ${OBJS} -o ${MAIN}
+
+.cpp.o:
+	${CXX} ${CXXFLAGS} -c $< -o $@
+
+clean:
+	${RM} ${PROGS} ${MAIN} ${OBJS} *.o *~. 

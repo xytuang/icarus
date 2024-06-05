@@ -1,0 +1,12 @@
+fun countdown(num) {
+    if (num == 1) {
+        print "1";
+        print "blastoff!";
+    }
+    else {
+        print num;
+        countdown(num - 1);
+    }
+}
+
+countdown(10);
