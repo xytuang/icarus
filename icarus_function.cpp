@@ -1,4 +1,5 @@
 #include "icarus_function.h"
+#include "icarus_instance.h"
 
 template <typename R>
 IcarusFunction<R>::IcarusFunction(Function<R>* declaration, Environment* closure, bool isInitializer) {

@@ -9,6 +9,7 @@
 #include "icarus_callable.h"
 #include "interpreter.h"
 
+template <typename R>
 class IcarusFunction;
 
 class IcarusClass : public IcarusCallable {

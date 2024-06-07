@@ -20,42 +20,15 @@ class IcarusFunction : public IcarusCallable {
         Environment* closure;
         bool isInitializer;
     public:
-        IcarusFunction(Function<R>* declaration, Environment* closure, bool isInitializer) {
-            this->closure = closure;
-            this->declaration = declaration;
-            this->isInitializer = isInitializer;
-        }
+        IcarusFunction(Function<R>* declaration, Environment* closure, bool isInitializer);
 
-        IcarusFunction<R>* bind(IcarusInstance* instance) {
-            Environment* environment = new Environment(closure);
-            environment->define("this", instance);
-            return new IcarusFunction(declaration, environment, isInitializer);
-        }
+        IcarusFunction<R>* bind(IcarusInstance* instance);
 
-        int arity() {
-            return this->declaration->params.size();
-        }
+        int arity();
 
-        std::any call(Interpreter* interpreter, std::vector<std::any> arguments) {
-            Environment* environment = new Environment(this->closure);
-            for (int i = 0; i < this->declaration->params.size(); i++) {
-                environment->define(this->declaration->params[i]->getLexeme(), arguments[i]);
-            }
-            try {
-                interpreter->executeBlock(this->declaration->body, environment);
-            } catch (StackUnwinder* returnValue) {
-                return returnValue->value;
-            }
-            if (isInitializer) {
-                return closure->getAt(0, "this");
-            }
-            if (isInitializer) return closure->getAt(0, "this");
-            return nullptr;
-        }
+        std::any call(Interpreter* interpreter, std::vector<std::any> arguments);
 
-        std::string toString() {
-            return "<fn " + this->declaration->name->getLexeme() + ">";
-        }
+        std::string toString();
 };
 
 

@@ -93,22 +93,22 @@ std::any Resolver::visitBlockStmt(Block<std::any>* stmt) {
 
 std::any Resolver::visitClassStmt(Class<std::any>* stmt) {
     ClassType enclosingClass = this->currentClass;
-    this->currentClass = CLASS;
+    this->currentClass = ClassType::CLASS;
     declare(stmt->name);
     define(stmt->name);
 
     beginScope();
     scopes.back()["this"] = true;
     for (Stmt<std::any>* method : stmt->methods) {
-        FunctionType declaration = METHOD;
+        FunctionType declaration = FunctionType::METHOD;
         Function<std::any>* functionObj = dynamic_cast<Function<std::any>*>(method);
         if (functionObj->name->getLexeme() == "init") {
-            declaration = INITIALIZER;
+            declaration = FunctionType::INITIALIZER;
         }
         resolveFunction(dynamic_cast<Function<std::any>*>(method), declaration);
     }
     endScope();
-    this->currentClass = NONE;
+    this->currentClass = enclosingClass;
     return nullptr;
 }
 
@@ -125,7 +125,7 @@ std::any Resolver::visitFunctionStmt(Function<std::any>* stmt) {
     declare(stmt->name);
     define(stmt->name);
 
-    resolveFunction(stmt, FUNCTION);
+    resolveFunction(stmt, FunctionType::FUNCTION);
     return nullptr;
 }
 
@@ -151,11 +151,11 @@ std::any Resolver::visitPrintStmt(Print<std::any>* stmt) {
 }
 
 std::any Resolver::visitReturnStmt(Return<std::any>* stmt) {
-    if (this->currentFunction == NONE) {
+    if (this->currentFunction == FunctionType::NONE) {
         Icarus::error(stmt->keyword, "Can't return from top level code");
     }
     if (stmt->value != nullptr) {
-        if (this->currentFunction == INITIALIZER) {
+        if (this->currentFunction == FunctionType::INITIALIZER) {
             Icarus::error(stmt->keyword, "Can't return a value from initializer");
         }
         resolve(stmt->value);
@@ -228,7 +228,7 @@ std::any Resolver::visitSetExpr(Set<std::any>* expr) {
 
 
 std::any Resolver::visitThisExpr(This<std::any>* expr) {
-    if (expr->classType == NONE) {
+    if (this->currentClass == ClassType::NONE) {
         Icarus::error(expr->keyword, "Can't use \'this\' outside of class");
         return nullptr;
     }

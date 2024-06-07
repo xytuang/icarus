@@ -4,6 +4,7 @@
 #include <any>
 
 #include "icarus_class.h"
+#include "icarus_function.h"
 #include "runtime_error.h"
 #include "token.h"
 

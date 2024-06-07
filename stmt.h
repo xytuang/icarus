@@ -4,6 +4,8 @@
 #include <string>
 #include <any>
 #include "token.h"
+#include "expr.h"
+
 using namespace std;
 
 template <typename R> class Block;
