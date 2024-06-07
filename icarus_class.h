@@ -8,12 +8,13 @@
 
 #include "icarus_callable.h"
 #include "interpreter.h"
-#include "icarus_function.h"
+
+class IcarusFunction;
 
 class IcarusClass : public IcarusCallable {
     public:
         std::string name;
-        unordered_map<std::string, IcarusFunction<std::any>*> methods;
+        unordered_map<std::string, IcarusFunction<std::any>* > methods;
 
         IcarusClass(std::string name, unordered_map<std::string, IcarusFunction<std::any>*> methods);
 

@@ -1,12 +1,11 @@
-#include "icarus_class.h"
-
 #include <string>
 #include <any>
 #include <vector>
 
 #include "interpreter.h"
-#include "icarus_instance.h"
+#include "icarus_class.h"
 #include "icarus_function.h"
+#include "icarus_instance.h"
 
 IcarusClass::IcarusClass(std::string name, unordered_map<std::string, IcarusFunction<std::any>*> methods) {
     this->name = name;
@@ -18,11 +17,13 @@ std::string IcarusClass::toString() {
 }
 
 
+//arity of constructor
 int IcarusClass::arity() {
-    IcarusFunction<std::any>* initialzier = findMethod("init");
+    IcarusFunction<std::any>* initializer = findMethod("init");
     if (initializer == nullptr) return 0;
     return initializer->arity();
 }
+
 std::any IcarusClass::call(Interpreter* interpreter, std::vector<std::any> arguments) {
     IcarusInstance* instance = new IcarusInstance(this);
     IcarusFunction<std::any>* initializer = findMethod("init");

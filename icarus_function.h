@@ -10,7 +10,8 @@
 #include "interpreter.h"
 #include "env.h"
 #include "stack_unwinder.h"
-#include "icarus_instance.h"
+
+class IcarusInstance;
 
 template <typename R>
 class IcarusFunction : public IcarusCallable {
@@ -25,7 +26,7 @@ class IcarusFunction : public IcarusCallable {
             this->isInitializer = isInitializer;
         }
 
-        IcarusFunction* bind(IcarusInstance* instance) {
+        IcarusFunction<R>* bind(IcarusInstance* instance) {
             Environment* environment = new Environment(closure);
             environment->define("this", instance);
             return new IcarusFunction(declaration, environment, isInitializer);

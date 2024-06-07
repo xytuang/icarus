@@ -1,7 +1,6 @@
 #ifndef ICARUS_INSTANCE_H
 #define ICARUS_INSTANCE_H
 
-#include "icarus_class.h"
 
 #include <unordered_map>
 #include <any>
@@ -9,10 +8,12 @@
 
 #include "token.h"
 
+class IcarusClass;
+
 class IcarusInstance {
     private:
         IcarusClass* klass;
-        unordered_map<std::string, std::any> fields;
+        std::unordered_map<std::string, std::any> fields;
     public:
         IcarusInstance(IcarusClass* klass);
 
