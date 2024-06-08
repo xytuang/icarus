@@ -1,3 +1,35 @@
 class Bagel {}
 var bagel = Bagel();
 print bagel;
+
+class Bear {
+    init(val) {
+        this.val = val;
+    }
+    sound() {
+        print "GROWL";
+    }
+    getNum() {
+        return this.val;
+    }
+}
+
+
+class Lion {
+    init(val) {
+        this.val = val;
+    }
+    sound() {
+        print "ROAR";
+    }
+    getNum() {
+        return this.val;
+    }
+}
+
+var bear = Bear(2);
+bear.sound();
+print(bear.getNum());
+
+var cat = Lion(3);
+cat.sound();
