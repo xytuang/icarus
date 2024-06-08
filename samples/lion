@@ -1,0 +1,15 @@
+
+class Lion {
+    init(val) {
+        this.val = val;
+    }
+    sound() {
+        print "ROAR";
+    }
+    getNum() {
+        return this.val;
+    }
+}
+
+var cat = Lion(3);
+cat.sound();

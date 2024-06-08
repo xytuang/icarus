@@ -15,21 +15,7 @@ class Bear {
 }
 
 
-class Lion {
-    init(val) {
-        this.val = val;
-    }
-    sound() {
-        print "ROAR";
-    }
-    getNum() {
-        return this.val;
-    }
-}
-
 var bear = Bear(2);
 bear.sound();
 print(bear.getNum());
 
-var cat = Lion(3);
-cat.sound();

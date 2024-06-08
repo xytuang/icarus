@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <any>
-
+#include <iostream>
 #include "token.h"
 #include "runtime_error.h"
 
@@ -65,7 +65,6 @@ class Environment {
                 enclosing->assign(name, value);
                 return;
             }
-
             throw new RuntimeError(name, "Undefined variable: " + name->getLexeme() + ".");
 
         }
