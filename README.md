@@ -1,5 +1,7 @@
 Icarus is a dynamically typed language that is implemented in c++. It has the following features.
 
+# NOTE: Icarus leaks memory because I have not integrated garbage collection into the language and also because this is written in C++. Yes I am working on it.
+
 ## Supported data types:<br>
 Booleans <br>
 
