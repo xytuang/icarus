@@ -14,21 +14,32 @@ nil (the equivalent of null in Java or nullptr in c++)<br>
 ## Supported operators and their representation:<br>
 #### Arithmetic <br>
 Addition <br>
+
         5 + 2 // gives 7
+
 Subtraction <br>
+
         5 - 2 // gives 3
+
 Multiplication <br>
+
         5 * 2 // gives 10
+
 Division<br>
+
         5 / 2 // gives 2.5
 
 Note that numbers are automatically converted to floating point numbers under the hood, which is why <code>5/2</code> gives 2.5.
 
 Negation<br>
+
         -5 //-5 duh
 
 #### Logical <br>
 Less than<br>
+
+        5 < 2 // gives false
+
 Less than or equal (number1 <= number<br>
 Greater than (number1 > number2)<br>
 Greater than or equal (number1 >= number2)<br>
