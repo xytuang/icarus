@@ -1,14 +1,22 @@
-Icarus is a dynamically typed language that has the following features.
+Icarus is a dynamically typed language that is implemented in c++. It has the following features.
 
 ## Supported data types:<br>
 Booleans <br>
+
         true;
         false;
+
 Numbers <br>
+
         12    // an integer 12
         12.25 // a decimal 12.25
+
 Strings <br>
+
         "some string"
+
+Note that Icarus uses double quotes and not single quotes for strings
+
 nil (the equivalent of null in Java or nullptr in c++)<br>
 
 ## Supported operators and their representation:<br>
@@ -40,18 +48,42 @@ Less than<br>
 
         5 < 2 // gives false
 
-Less than or equal (number1 <= number<br>
-Greater than (number1 > number2)<br>
-Greater than or equal (number1 >= number2)<br>
-Equal (number1 == number2)<br>
-Not equal (number1 != number2) <br>
+Less than or equal <br>
+
+        5 <= 2 // gives false
+
+Greater than <br>
+
+        5 > 2 // gives true
+
+Greater than or equal <br>
+
+        5 >= 2 // gives true
+
+Equal <br>
+
+        5 == 2 // gives false
+
+Not equal <br>
+
+        5 != 2 // gives true
 
 not (!some_boolean) <br>
-and (boolean1 and boolean2) <br>
-or (boolean1 or boolean2) <br>
+
+        !true // gives false
+
+and <br>
+
+        true and false // gives false
+
+or <br>
+
+        true or false // gives true
 
 #### Grouping <br>
-Grouping using brackets (eg. (2 + 2 + 2)/3 = 2)
+Grouping using brackets<br>
+
+        (2 + 2 + 2)/3 //gives 2
 
 
 ## Statements:<br>
