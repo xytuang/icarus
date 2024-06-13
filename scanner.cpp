@@ -1,4 +1,6 @@
 #include <any>
+#include <memory>
+
 #include "scanner.h"
 #include "icarus.h"
 
@@ -25,7 +27,7 @@ char Scanner::advance() {
 
 void Scanner::addToken(TokenType type, std::any literal) {
     std::string text = source.substr(start, current - start);
-    tokens.push_back(new Token(type, text, literal, line));
+    tokens.push_back(std::make_shared<Token>(type, text, literal, line));
 }
 
 void Scanner::addToken(TokenType type) {
@@ -161,11 +163,11 @@ Scanner::Scanner(std::string source) {
 }
 
 
-std::vector<Token *> Scanner::scanTokens() {
+std::vector<shared_ptr<Token>> Scanner::scanTokens() {
     while(!isAtEnd()) {
         start = current;
         scanToken();
     }
-    this->tokens.push_back(new Token(END_OF_FILE, "", nullptr, line));
+    this->tokens.push_back(std::make_shared<Token>(END_OF_FILE, "", nullptr, line));
     return this->tokens;
 }

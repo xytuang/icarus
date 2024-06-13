@@ -103,6 +103,7 @@ void defineAst(std::string outputDir, std::string baseName, std::vector<std::str
     outFile << "#include <vector>" << std::endl;
     outFile << "#include <string>" << std::endl;
     outFile << "#include <any>" << std::endl;
+    outFile << "#include <memory>" << std::endl;
     outFile << "#include \"token.h\"" << std::endl;
     outFile << "using namespace std;" << std::endl;
     outFile << std::endl;
@@ -141,28 +142,28 @@ int main() {
     std::string outputDir = "..";
     
     std::vector<std::string> expressionTypes = {
-      "Assign   : Token* name, Expr<R>* value",
-      "Binary   : Expr<R>* left, Token* operation, Expr<R>* right",
-      "Call     : Expr<R>* callee, Token* paren, vector<Expr<R>*> arguments",
-      "Get      : Expr<R>* object, Token* name",
-      "Grouping : Expr<R>* expression",
+      "Assign   : shared_ptr<Token> name, shared_ptr<Expr<R>> value",
+      "Binary   : shared_ptr<Expr<R>> left, shared_ptr<Token> operation, shared_ptr<Expr<R>> right",
+      "Call     : shared_ptr<Expr<R>> callee, shared_ptr<Token> paren, vector<shared_ptr<Expr<R>>> arguments",
+      "Get      : shared_ptr<Expr<R>> object, shared_ptr<Token> name",
+      "Grouping : shared_ptr<Expr<R>> expression",
       "Literal  : any value",
-      "Logical  : Expr<R>* left, Token* operation, Expr<R>* right", 
-      "Set      : Expr<R>* object, Token* name, Expr<R>* value",
-      "This     : Token* keyword",
-      "Unary    : Token* operation, Expr<R>* right",
-      "Variable : Token* name"};
+      "Logical  : shared_ptr<Expr<R>> left, shared_ptr<Token> operation, shared_ptr<Expr<R>> right", 
+      "Set      : shared_ptr<Expr<R>> object, shared_ptr<Token> name, shared_ptr<Expr<R>> value",
+      "This     : shared_ptr<Token> keyword",
+      "Unary    : shared_ptr<Token> operation, shared_ptr<Expr<R>> right",
+      "Variable : shared_ptr<Token> name"};
     defineAst(outputDir, "Expr", expressionTypes);
     
     std::vector<std::string> statementTypes = {
-    "Block : vector<Stmt<R>*> statements",
-    "Class : Token* name, vector<Stmt<R>*> methods",
-    "Expression : Expr<R>* expression", 
-    "Function : Token* name, vector<Token*> params, vector<Stmt<R>*> body",
-    "If : Expr<R>* condition, Stmt<R>* thenBranch, Stmt<R>* elseBranch",
-    "Print : Expr<R>* expression",
-    "Return : Token* keyword, Expr<R>* value",
-    "Var : Token* name, Expr<R>* initializer",
-    "While : Expr<R>* condition, Stmt<R>* body"};
+    "Block      : vector<shared_ptr<Stmt<R>>> statements",
+    "Class      : shared_ptr<Token> name, vector<shared_ptr<Stmt<R>>> methods",
+    "Expression : shared_ptr<Expr<R>> expression", 
+    "Function   : shared_ptr<Token> name, vector<shared_ptr<Token>> params, vector<shared_ptr<Stmt<R>>> body",
+    "If         : shared_ptr<Expr<R>> condition, shared_ptr<Stmt<R>> thenBranch, shared_ptr<Stmt<R>> elseBranch",
+    "Print      : shared_ptr<Expr<R>> expression",
+    "Return     : shared_ptr<Token> keyword, shared_ptr<Expr<R>> value",
+    "Var        : shared_ptr<Token> name, shared_ptr<Expr<R>> initializer",
+    "While      : shared_ptr<Expr<R>> condition, shared_ptr<Stmt<R>> body"};
     defineAst(outputDir, "Stmt", statementTypes);
 }

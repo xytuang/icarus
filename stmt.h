@@ -3,9 +3,8 @@
 #include <vector>
 #include <string>
 #include <any>
+#include <memory>
 #include "token.h"
-#include "expr.h"
-
 using namespace std;
 
 template <typename R> class Block;
@@ -43,8 +42,8 @@ public:
 template <typename R>
 class Block : public Stmt<R> {
 public:
-    vector<Stmt<R>*> statements;
-    Block(vector<Stmt<R>*> statements) {
+    vector<shared_ptr<Stmt<R>>> statements;
+    Block(vector<shared_ptr<Stmt<R>>> statements) {
         this->statements=statements;
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
@@ -55,9 +54,9 @@ public:
 template <typename R>
 class Class : public Stmt<R> {
 public:
-    Token* name;
-    vector<Stmt<R>*> methods;
-    Class(Token* name, vector<Stmt<R>*> methods) {
+    shared_ptr<Token> name;
+    vector<shared_ptr<Stmt<R>>> methods;
+    Class(shared_ptr<Token> name, vector<shared_ptr<Stmt<R>>> methods) {
         this->name=name;
         this->methods=methods;
     }
@@ -69,8 +68,8 @@ public:
 template <typename R>
 class Expression : public Stmt<R> {
 public:
-    Expr<R>* expression;
-    Expression(Expr<R>* expression) {
+    shared_ptr<Expr<R>> expression;
+    Expression(shared_ptr<Expr<R>> expression) {
         this->expression=expression;
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
@@ -81,10 +80,10 @@ public:
 template <typename R>
 class Function : public Stmt<R> {
 public:
-    Token* name;
-    vector<Token*> params;
-    vector<Stmt<R>*> body;
-    Function(Token* name, vector<Token*> params, vector<Stmt<R>*> body) {
+    shared_ptr<Token> name;
+    vector<shared_ptr<Token>> params;
+    vector<shared_ptr<Stmt<R>>> body;
+    Function(shared_ptr<Token> name, vector<shared_ptr<Token>> params, vector<shared_ptr<Stmt<R>>> body) {
         this->name=name;
         this->params=params;
         this->body=body;
@@ -97,10 +96,10 @@ public:
 template <typename R>
 class If : public Stmt<R> {
 public:
-    Expr<R>* condition;
-    Stmt<R>* thenBranch;
-    Stmt<R>* elseBranch;
-    If(Expr<R>* condition, Stmt<R>* thenBranch, Stmt<R>* elseBranch) {
+    shared_ptr<Expr<R>> condition;
+    shared_ptr<Stmt<R>> thenBranch;
+    shared_ptr<Stmt<R>> elseBranch;
+    If(shared_ptr<Expr<R>> condition, shared_ptr<Stmt<R>> thenBranch, shared_ptr<Stmt<R>> elseBranch) {
         this->condition=condition;
         this->thenBranch=thenBranch;
         this->elseBranch=elseBranch;
@@ -113,8 +112,8 @@ public:
 template <typename R>
 class Print : public Stmt<R> {
 public:
-    Expr<R>* expression;
-    Print(Expr<R>* expression) {
+    shared_ptr<Expr<R>> expression;
+    Print(shared_ptr<Expr<R>> expression) {
         this->expression=expression;
     }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
@@ -125,9 +124,9 @@ public:
 template <typename R>
 class Return : public Stmt<R> {
 public:
-    Token* keyword;
-    Expr<R>* value;
-    Return(Token* keyword, Expr<R>* value) {
+    shared_ptr<Token> keyword;
+    shared_ptr<Expr<R>> value;
+    Return(shared_ptr<Token> keyword, shared_ptr<Expr<R>> value) {
         this->keyword=keyword;
         this->value=value;
     }
@@ -139,9 +138,9 @@ public:
 template <typename R>
 class Var : public Stmt<R> {
 public:
-    Token* name;
-    Expr<R>* initializer;
-    Var(Token* name, Expr<R>* initializer) {
+    shared_ptr<Token> name;
+    shared_ptr<Expr<R>> initializer;
+    Var(shared_ptr<Token> name, shared_ptr<Expr<R>> initializer) {
         this->name=name;
         this->initializer=initializer;
     }
@@ -153,9 +152,9 @@ public:
 template <typename R>
 class While : public Stmt<R> {
 public:
-    Expr<R>* condition;
-    Stmt<R>* body;
-    While(Expr<R>* condition, Stmt<R>* body) {
+    shared_ptr<Expr<R>> condition;
+    shared_ptr<Stmt<R>> body;
+    While(shared_ptr<Expr<R>> condition, shared_ptr<Stmt<R>> body) {
         this->condition=condition;
         this->body=body;
     }

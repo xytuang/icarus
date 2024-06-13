@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <any>
+#include <memory>
 #include "token.h"
 using namespace std;
 
@@ -45,9 +46,9 @@ public:
 template <typename R>
 class Assign : public Expr<R> {
 public:
-    Token* name;
-    Expr<R>* value;
-    Assign(Token* name, Expr<R>* value) {
+    shared_ptr<Token> name;
+    shared_ptr<Expr<R>> value;
+    Assign(shared_ptr<Token> name, shared_ptr<Expr<R>> value) {
         this->name=name;
         this->value=value;
     }
@@ -59,10 +60,10 @@ public:
 template <typename R>
 class Binary : public Expr<R> {
 public:
-    Expr<R>* left;
-    Token* operation;
-    Expr<R>* right;
-    Binary(Expr<R>* left, Token* operation, Expr<R>* right) {
+    shared_ptr<Expr<R>> left;
+    shared_ptr<Token> operation;
+    shared_ptr<Expr<R>> right;
+    Binary(shared_ptr<Expr<R>> left, shared_ptr<Token> operation, shared_ptr<Expr<R>> right) {
         this->left=left;
         this->operation=operation;
         this->right=right;
@@ -75,10 +76,10 @@ public:
 template <typename R>
 class Call : public Expr<R> {
 public:
-    Expr<R>* callee;
-    Token* paren;
-    vector<Expr<R>*> arguments;
-    Call(Expr<R>* callee, Token* paren, vector<Expr<R>*> arguments) {
+    shared_ptr<Expr<R>> callee;
+    shared_ptr<Token> paren;
+    vector<shared_ptr<Expr<R>>> arguments;
+    Call(shared_ptr<Expr<R>> callee, shared_ptr<Token> paren, vector<shared_ptr<Expr<R>>> arguments) {
         this->callee=callee;
         this->paren=paren;
         this->arguments=arguments;
@@ -91,9 +92,9 @@ public:
 template <typename R>
 class Get : public Expr<R> {
 public:
-    Expr<R>* object;
-    Token* name;
-    Get(Expr<R>* object, Token* name) {
+    shared_ptr<Expr<R>> object;
+    shared_ptr<Token> name;
+    Get(shared_ptr<Expr<R>> object, shared_ptr<Token> name) {
         this->object=object;
         this->name=name;
     }
@@ -105,8 +106,8 @@ public:
 template <typename R>
 class Grouping : public Expr<R> {
 public:
-    Expr<R>* expression;
-    Grouping(Expr<R>* expression) {
+    shared_ptr<Expr<R>> expression;
+    Grouping(shared_ptr<Expr<R>> expression) {
         this->expression=expression;
     }
     R accept(typename Expr<R>::template Visitor<R>* visitor) override {
@@ -129,10 +130,10 @@ public:
 template <typename R>
 class Logical : public Expr<R> {
 public:
-    Expr<R>* left;
-    Token* operation;
-    Expr<R>* right;
-    Logical(Expr<R>* left, Token* operation, Expr<R>* right) {
+    shared_ptr<Expr<R>> left;
+    shared_ptr<Token> operation;
+    shared_ptr<Expr<R>> right;
+    Logical(shared_ptr<Expr<R>> left, shared_ptr<Token> operation, shared_ptr<Expr<R>> right) {
         this->left=left;
         this->operation=operation;
         this->right=right;
@@ -145,10 +146,10 @@ public:
 template <typename R>
 class Set : public Expr<R> {
 public:
-    Expr<R>* object;
-    Token* name;
-    Expr<R>* value;
-    Set(Expr<R>* object, Token* name, Expr<R>* value) {
+    shared_ptr<Expr<R>> object;
+    shared_ptr<Token> name;
+    shared_ptr<Expr<R>> value;
+    Set(shared_ptr<Expr<R>> object, shared_ptr<Token> name, shared_ptr<Expr<R>> value) {
         this->object=object;
         this->name=name;
         this->value=value;
@@ -161,8 +162,8 @@ public:
 template <typename R>
 class This : public Expr<R> {
 public:
-    Token* keyword;
-    This(Token* keyword) {
+    shared_ptr<Token> keyword;
+    This(shared_ptr<Token> keyword) {
         this->keyword=keyword;
     }
     R accept(typename Expr<R>::template Visitor<R>* visitor) override {
@@ -173,9 +174,9 @@ public:
 template <typename R>
 class Unary : public Expr<R> {
 public:
-    Token* operation;
-    Expr<R>* right;
-    Unary(Token* operation, Expr<R>* right) {
+    shared_ptr<Token> operation;
+    shared_ptr<Expr<R>> right;
+    Unary(shared_ptr<Token> operation, shared_ptr<Expr<R>> right) {
         this->operation=operation;
         this->right=right;
     }
@@ -187,8 +188,8 @@ public:
 template <typename R>
 class Variable : public Expr<R> {
 public:
-    Token* name;
-    Variable(Token* name) {
+    shared_ptr<Token> name;
+    Variable(shared_ptr<Token> name) {
         this->name=name;
     }
     R accept(typename Expr<R>::template Visitor<R>* visitor) override {

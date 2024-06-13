@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include <memory>
+
 #include "expr.h"
 #include "tokentype.h"
 #include "stmt.h"
@@ -15,55 +17,55 @@ template <typename R>
 class Parser {
     public:
         class ParseError : public std::exception {};
-        Parser<R>(std::vector<Token*> tokens);
-        std::vector<Stmt<R>*> parse();
+        Parser<R>(std::vector<std::shared_ptr<Token>> tokens);
+        std::vector<std::shared_ptr<Stmt<R>>> parse();
 
     private:
-        std::vector<Token *> tokens;
+        std::vector<std::shared_ptr<Token>> tokens;
         int current;
 
         bool isAtEnd();
-        Token* peek();
-        Token* previous();
-        Token* advance();
+        std::shared_ptr<Token> peek();
+        std::shared_ptr<Token> previous();
+        std::shared_ptr<Token> advance();
         bool check(TokenType type);
 
-        ParseError* error(Token* token, std::string message);
+        ParseError* error(std::shared_ptr<Token> token, std::string message);
 
-        Token* consume(TokenType type, std::string message);
+        std::shared_ptr<Token> consume(TokenType type, std::string message);
 
         void synchronize();
 
         bool match(std::initializer_list<TokenType> types);
 
-        Expr<R>* primary();
-        Expr<R>* finishCall(Expr<R>* callee);
-        Expr<R>* call();
-        Expr<R>* unary();
-        Expr<R>* factor();
-        Expr<R>* term();
-        Expr<R>* comparison();
-        Expr<R>* equality();
-        Expr<R>* logicalAnd();
-        Expr<R>* logicalOr();
-        Expr<R>* assignment();
-        Expr<R>* expression();
+        std::shared_ptr<Expr<R>> primary();
+        std::shared_ptr<Expr<R>> finishCall(std::shared_ptr<Expr<R>> callee);
+        std::shared_ptr<Expr<R>> call();
+        std::shared_ptr<Expr<R>> unary();
+        std::shared_ptr<Expr<R>> factor();
+        std::shared_ptr<Expr<R>> term();
+        std::shared_ptr<Expr<R>> comparison();
+        std::shared_ptr<Expr<R>> equality();
+        std::shared_ptr<Expr<R>> logicalAnd();
+        std::shared_ptr<Expr<R>> logicalOr();
+        std::shared_ptr<Expr<R>> assignment();
+        std::shared_ptr<Expr<R>> expression();
 
 
-        Stmt<R>* expressionStatement();
-        Stmt<R>* function(std::string kind);
-        std::vector<Stmt<R>*> block();
-        Stmt<R>* whileStatement();
-        Stmt<R>* returnStatement();
-        Stmt<R>* printStatement();
-        Stmt<R>* ifStatement();
-        Stmt<R>* forStatement();
-        Stmt<R>* statement();
+        std::shared_ptr<Stmt<R>> expressionStatement();
+        std::shared_ptr<Stmt<R>> function(std::string kind);
+        std::vector<std::shared_ptr<Stmt<R>>> block();
+        std::shared_ptr<Stmt<R>> whileStatement();
+        std::shared_ptr<Stmt<R>> returnStatement();
+        std::shared_ptr<Stmt<R>> printStatement();
+        std::shared_ptr<Stmt<R>> ifStatement();
+        std::shared_ptr<Stmt<R>> forStatement();
+        std::shared_ptr<Stmt<R>> statement();
 
-        Stmt<R>* classDeclaration();
+        std::shared_ptr<Stmt<R>> classDeclaration();
 
-        Stmt<R>* varDeclaration();
-        Stmt<R>* declaration();
+        std::shared_ptr<Stmt<R>> varDeclaration();
+        std::shared_ptr<Stmt<R>> declaration();
 
 };
 

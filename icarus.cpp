@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <cstdlib>
+#include <memory>
 
 #include "icarus.h"
 #include "scanner.h"
@@ -21,19 +22,24 @@ bool Icarus::hadError = false;
 bool Icarus::hadRuntimeError = false;
 
 void Icarus::run(std::string source){
-    Scanner *scanner = new Scanner(source);
+    std::shared_ptr<Scanner> scanner = std::make_shared<Scanner>(source);
     std::vector<Token *> tokens = scanner->scanTokens();
-    Parser<std::any>* parser = new Parser<std::any>(tokens);
+
+    std::shared_ptr<Parser<std::any>> parser = std::make_shared<Parser<std::any>>(tokens);
 
     std::vector<Stmt<std::any>*> statements = parser->parse();
 
     if (hadError) return;
 
-    Resolver* resolver = new Resolver(interpreter);
+    std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(interpreter);
+
     resolver->resolve(statements);
+
     if (hadError) return;
+
     interpreter->interpret(statements);
 
+    delete interpreter;
 }
 
 void Icarus::runFile(char *filename) {

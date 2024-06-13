@@ -5,6 +5,8 @@
 #include <vector>
 #include <unordered_map>
 #include <any>
+#include <memory>
+
 
 #include "tokentype.h"
 #include "token.h"
@@ -12,7 +14,7 @@
 class Scanner {
     private:
         std::string source;
-        std::vector<Token *> tokens;
+        std::vector<shared_ptr<Token>> tokens;
         int start;
         int current;
         int line;
@@ -49,6 +51,6 @@ class Scanner {
     public:
         Scanner(std::string source);
 
-        std::vector<Token *> scanTokens();
+        std::vector<shared_ptr<Token>> scanTokens();
 };
 #endif
