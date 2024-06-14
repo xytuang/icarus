@@ -23,11 +23,11 @@ bool Icarus::hadRuntimeError = false;
 
 void Icarus::run(std::string source){
     std::shared_ptr<Scanner> scanner = std::make_shared<Scanner>(source);
-    std::vector<Token *> tokens = scanner->scanTokens();
+    std::vector<std::shared_ptr<Token>> tokens = scanner->scanTokens();
 
     std::shared_ptr<Parser<std::any>> parser = std::make_shared<Parser<std::any>>(tokens);
 
-    std::vector<Stmt<std::any>*> statements = parser->parse();
+    std::vector<std::shared_ptr<Stmt<std::any>>> statements = parser->parse();
 
     if (hadError) return;
 
