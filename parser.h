@@ -70,14 +70,14 @@ class Parser {
 };
 
 template <typename R>
-Parser<R>::Parser(std::vector<Token*> tokens){
+Parser<R>::Parser(std::vector<std::shared_ptr<Token>> tokens){
     this->tokens = tokens;
     this->current = 0;
 }
 
 
 template <typename R>
-Token* Parser<R>::peek() {
+std::shared_ptr<Token> Parser<R>::peek() {
     return this->tokens[this->current];
 }
 
@@ -88,12 +88,12 @@ bool Parser<R>::isAtEnd() {
 
 
 template <typename R>
-Token* Parser<R>::previous(){
+std::shared_ptr<Token> Parser<R>::previous(){
     return this->tokens[this->current - 1];
 }
 
 template <typename R>
-Token* Parser<R>::advance() {
+std::shared_ptr<Token> Parser<R>::advance() {
     if (!isAtEnd()) {
         this->current++;
     }
@@ -109,14 +109,14 @@ bool Parser<R>::check(TokenType type) {
 }
 
 template <typename R>
-typename Parser<R>::ParseError* Parser<R>::error(Token* token, std::string message) {
+typename Parser<R>::ParseError* Parser<R>::error(std::shared_ptr<Token> token, std::string message) {
     Icarus::error(token, message);
     return new Parser::ParseError();
 }
 
 
 template <typename R>
-Token* Parser<R>::consume(TokenType type, std::string message) {
+std::shared_ptr<Token> Parser<R>::consume(TokenType type, std::string message) {
     if(check(type)) return advance();
     throw error(peek(), message);
 }
@@ -158,27 +158,27 @@ template <typename R>
 }
 
 template <typename R>
-Expr<R>* Parser<R>::primary() {
-    if (match({FALSE})) return new Literal<R>(false);
-    if (match({TRUE})) return new Literal<R>(true);
-    if (match({NIL})) return new Literal<R>(nullptr);
+std::shared_ptr<Expr<R>> Parser<R>::primary() {
+    if (match({FALSE})) return std::make_shared<Literal<R>>(false);
+    if (match({TRUE})) return std::make_shared<Literal<R>>(true);
+    if (match({NIL})) return std::make_shared<Literal<R>>(nullptr);
 
-    if (match({NUMBER, STRING})) return new Literal<R>(previous()->getLiteral());
-    if (match({THIS})) return new This<R>(previous());
-    if(match({IDENTIFIER})) return new Variable<R>(previous());
+    if (match({NUMBER, STRING})) return std::make_shared<Literal<R>>(previous()->getLiteral());
+    if (match({THIS})) return std::make_shared<This<R>>(previous());
+    if(match({IDENTIFIER})) return std::make_shared<Variable<R>>(previous());
 
     if (match({LEFT_PAREN})) {
-        Expr<R>* expr = expression();
+        std::shared_ptr<Expr<R>> expr = expression();
         consume(RIGHT_PAREN, "Expect \')\' after expression.");
-        return new Grouping(expr);
+        return std::make_shared<Grouping<R>>(expr);
     }
 
     throw error(peek(), "Expect expression");
 }
 
 template <typename R>
-Expr<R>* Parser<R>::finishCall(Expr<R>* callee) {
-    std::vector<Expr<R>*> arguments;
+std::shared_ptr<Expr<R>> Parser<R>::finishCall(std::shared_ptr<Expr<R>> callee) {
+    std::vector<std::shared_ptr<Expr<R>>> arguments;
     if (!check(RIGHT_PAREN)) {
         do {
             if (arguments.size() >= 255) {
@@ -188,20 +188,20 @@ Expr<R>* Parser<R>::finishCall(Expr<R>* callee) {
         }
         while (match({COMMA}));
     }
-    Token* paren = consume(RIGHT_PAREN, "Expect \')\' after arguments");
-    return new Call<R>(callee, paren, arguments);
+    std::shared_ptr<Token> paren = consume(RIGHT_PAREN, "Expect \')\' after arguments");
+    return std::make_shared<Call<R>>(callee, paren, arguments);
 }
 
 template <typename R>
-Expr<R>* Parser<R>::call() {
-    Expr<R>* expr = primary();
+std::shared_ptr<Expr<R>> Parser<R>::call() {
+    std::shared_ptr<Expr<R>> expr = primary();
     while (true) {
         if (match({LEFT_PAREN})) {
             expr = finishCall(expr);
         }
         else if (match({DOT})) {
-            Token* name = consume(IDENTIFIER, "Expect property name after \'.\'");
-            expr = new Get<std::any>(expr, name);
+            std::shared_ptr<Token> name = consume(IDENTIFIER, "Expect property name after \'.\'");
+            expr = std::make_shared<Get<R>>(expr, name);
         }
         else {
             break;
@@ -211,96 +211,96 @@ Expr<R>* Parser<R>::call() {
 }
 
 template <typename R>
-Expr<R>* Parser<R>::unary() {
+std::shared_ptr<Expr<R>> Parser<R>::unary() {
     while(match({BANG, MINUS})){
-        Token* operation = previous();
-        Expr<R>* right = unary();
-        return new Unary<R>(operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = unary();
+        return std::make_shared<Unary<R>>(operation, right);
     }
     return call();
 }
 
 template <typename R>
-Expr<R>* Parser<R>::factor() {
-    Expr<R>* expr = unary();
+std::shared_ptr<Expr<R>> Parser<R>::factor() {
+    std::shared_ptr<Expr<R>> expr = unary();
     while(match({SLASH, STAR})) {
-        Token* operation = previous();
-        Expr<R>* right = unary();
-        expr = new Binary<R>(expr, operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = unary();
+        expr = std::make_shared<Binary<R>>(expr, operation, right);
     }
     return expr;
 }
 
 template <typename R>
-Expr<R>* Parser<R>::term() {
-    Expr<R>* expr = factor();
+std::shared_ptr<Expr<R>> Parser<R>::term() {
+    std::shared_ptr<Expr<R>> expr = factor();
     while(match({MINUS, PLUS})) {
-        Token* operation = previous();
-        Expr<R>* right = factor();
-        expr = new Binary<R>(expr, operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = factor();
+        expr = std::make_shared<Binary<R>>(expr, operation, right);
     }
     return expr;
 }
 
 template <typename R>
-Expr<R>* Parser<R>::comparison() {
-    Expr<R>* expr = term();
+std::shared_ptr<Expr<R>> Parser<R>::comparison() {
+    std::shared_ptr<Expr<R>> expr = term();
 
     while(match({GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
-        Token* operation = previous();
-        Expr<R>* right = term();
-        expr = new Binary<R>(expr, operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = term();
+        expr = std::make_shared<Binary<R>>(expr, operation, right);
     }
     return expr;
 }
 
 
 template <typename R>
-Expr<R>* Parser<R>::equality() {
-    Expr<R>* expr = comparison();
+std::shared_ptr<Expr<R>> Parser<R>::equality() {
+    std::shared_ptr<Expr<R>> expr = comparison();
     while(match({BANG_EQUAL, EQUAL_EQUAL})){
-        Token* operation = previous();
-        Expr<R>* right = comparison();
-        expr = new Binary<R>(expr, operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = comparison();
+        expr = std::make_shared<Binary<R>>(expr, operation, right);
     }
     return expr;
 }
 
 template <typename R>
-Expr<R>* Parser<R>::logicalAnd() {
-    Expr<R>* expr = equality();
+std::shared_ptr<Expr<R>> Parser<R>::logicalAnd() {
+    std::shared_ptr<Expr<R>> expr = equality();
     while (match({AND})) {
-        Token* operation = previous();
-        Expr<R>* right = equality();
-        expr = new Logical(expr, operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = equality();
+        expr = std::make_shared<Logical<R>>(expr, operation, right);
     }
     return expr;
 }
 
 template <typename R>
-Expr<R>* Parser<R>::logicalOr() {
-    Expr<R>* expr = logicalAnd();
+std::shared_ptr<Expr<R>> Parser<R>::logicalOr() {
+    std::shared_ptr<Expr<R>> expr = logicalAnd();
     while (match({OR})) {
-        Token* operation = previous();
-        Expr<R>* right = logicalAnd();
-        expr = new Logical(expr, operation, right);
+        std::shared_ptr<Token> operation = previous();
+        std::shared_ptr<Expr<R>> right = logicalAnd();
+        expr = std::make_shared<Logical<R>>(expr, operation, right);
     }
     return expr;
 }
 
 template <typename R>
-Expr<R>* Parser<R>::assignment() {
-    Expr<R>* expr = logicalOr();
+std::shared_ptr<Expr<R>> Parser<R>::assignment() {
+    std::shared_ptr<Expr<R>> expr = logicalOr();
     if (match({EQUAL})) {
-        Token* equals = previous();
-        Expr<R>* value = assignment();
-        if (dynamic_cast<Variable<std::any>*>(expr)) {
-            Token* name = (dynamic_cast<Variable<std::any>*>(expr))->name;
-            return new Assign<R>(name, value);
+        std::shared_ptr<Token> equals = previous();
+        std::shared_ptr<Expr<R>> value = assignment();
+        if (dynamic_pointer_cast<Variable<R>>(expr)) {
+            std::shared_ptr<Token> name = (dynamic_pointer_cast<Variable<R>>(expr))->name;
+            return std::make_shared<Assign<R>>(name, value);
         }
-        else if (dynamic_cast<Get<std::any>*>(expr)) {
-            Get<std::any>* get = dynamic_cast<Get<std::any>*>(expr);
-            return new Set<R>(get->object, get->name, value);
+        else if (dynamic_pointer_cast<Get<R>>(expr)) { //edit needed
+            std::shared_ptr<Get<R>> get = dynamic_pointer_cast<Get<R>>(expr);
+            return std::make_shared<Set<R>>(get->object, get->name, value);
         }
 
         error(equals, "Invalid assignment target.");
@@ -309,15 +309,15 @@ Expr<R>* Parser<R>::assignment() {
 
 }
 template <typename R>
-Expr<R>* Parser<R>::expression() {
+std::shared_ptr<Expr<R>> Parser<R>::expression() {
     return assignment();
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::function(std::string kind) {
-    Token* name = consume(IDENTIFIER, "Expect " + kind + " name.");
+std::shared_ptr<Stmt<R>> Parser<R>::function(std::string kind) {
+    std::shared_ptr<Token> name = consume(IDENTIFIER, "Expect " + kind + " name.");
     consume(LEFT_PAREN, "Expect \'(\' after " + kind + " name.");
-    std::vector<Token*> parameters;
+    std::vector<std::shared_ptr<Token>> parameters;
     if (!check(RIGHT_PAREN)) {
         do {
             if (parameters.size() >= 255) {
@@ -329,23 +329,22 @@ Stmt<R>* Parser<R>::function(std::string kind) {
     consume(RIGHT_PAREN, "Expect \')\' after parameters");
 
     consume(LEFT_BRACE, "Expect \'{\' before " + kind + " body.");
-    std::vector<Stmt<R>*> body = block();
-    return new Function<R>(name, parameters, body);
+    std::vector<std::shared_ptr<Stmt<R>>> body = block();
+    return std::make_shared<Function<R>>(name, parameters, body);
 }
 
 
 
-
 template <typename R>
-Stmt<R>* Parser<R>::expressionStatement() {
-    Expr<R>* expr = expression();
+std::shared_ptr<Stmt<R>> Parser<R>::expressionStatement() {
+    std::shared_ptr<Expr<R>> expr = expression();
     consume(SEMICOLON, "Expect \';\' after expression");
-    return new Expression<R>(expr);
+    return std::make_shared<Expression<R>>(expr);
 }
 
 template <typename R>
-std::vector<Stmt<R>*> Parser<R>::block() {
-    std::vector<Stmt<R>*> statements;
+std::vector<std::shared_ptr<Stmt<R>>> Parser<R>::block() {
+    std::vector<std::shared_ptr<Stmt<R>>> statements;
     while (!check(RIGHT_BRACE) && !isAtEnd()) {
         statements.push_back(declaration());
     }
@@ -354,52 +353,51 @@ std::vector<Stmt<R>*> Parser<R>::block() {
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::whileStatement() {
-
+std::shared_ptr<Stmt<R>> Parser<R>::whileStatement() {
     consume(LEFT_PAREN, "Expect \'(\' after \'while\'");
-    Expr<R>* condition = expression();
+    std::shared_ptr<Expr<R>> condition = expression();
     consume(RIGHT_PAREN, "Expect \')\' after while condition");
 
-    Stmt<R>* body = statement();
-    return new While<R>(condition, body);
+    std::shared_ptr<Stmt<R>> body = statement();
+    return std::make_shared<While<R>>(condition, body);
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::returnStatement() {
-    Token* keyword = previous();
-    Expr<R>* value = nullptr;
+std::shared_ptr<Stmt<R>> Parser<R>::returnStatement() {
+    std::shared_ptr<Token> keyword = previous();
+    std::shared_ptr<Expr<R>> value = nullptr;
     if (!check(SEMICOLON)) {
         value = expression();
     }
     consume(SEMICOLON, "Expect \';\' after return value");
-    return new Return<R>(keyword, value);
+    return std::make_shared<Return<R>>(keyword, value);
 }
 template <typename R>
-Stmt<R>* Parser<R>::printStatement() {
-    Expr<R>* value = expression();
+std::shared_ptr<Stmt<R>> Parser<R>::printStatement() {
+    std::shared_ptr<Expr<R>> value = expression();
     consume(SEMICOLON, "Expect \';\' after a value");
-    return new Print<R>(value);
+    return std::make_shared<Print<R>>(value);
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::ifStatement() {
+std::shared_ptr<Stmt<R>> Parser<R>::ifStatement() {
     consume(LEFT_PAREN, "Expect \'(\' after \'if\'");
-    Expr<R>* condition = expression();
+    std::shared_ptr<Expr<R>> condition = expression();
     consume(RIGHT_PAREN, "Expect \')\' after if condition");
 
-    Stmt<R>* thenBranch = statement();
-    Stmt<R>* elseBranch = nullptr;
+    std::shared_ptr<Stmt<R>> thenBranch = statement();
+    std::shared_ptr<Stmt<R>> elseBranch = nullptr;
     if (match({ELSE})) {
         elseBranch = statement();
     }
-    return new If<R>(condition, thenBranch, elseBranch);
+    return std::make_shared<If<R>>(condition, thenBranch, elseBranch);
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::forStatement() {
+std::shared_ptr<Stmt<R>> Parser<R>::forStatement() {
     consume(LEFT_PAREN, "Expect \'(\' after \'for\'");
 
-    Stmt<R>* initializer;
+    std::shared_ptr<Stmt<R>> initializer;
     if (match({SEMICOLON})) {
         initializer = nullptr;
     }
@@ -410,44 +408,44 @@ Stmt<R>* Parser<R>::forStatement() {
         initializer = expressionStatement();
     }
 
-    Expr<R>* condition = nullptr;
+    std::shared_ptr<Expr<R>> condition = nullptr;
     if (!check(SEMICOLON)) {
         condition = expression();
     }
     consume(SEMICOLON, "Expect \';\' after loop condition");
 
 
-    Expr<R>* increment = nullptr;
+    std::shared_ptr<Expr<R>> increment = nullptr;
     if (!check(RIGHT_PAREN)) {
         increment = expression();
     }
     consume(RIGHT_PAREN, "Expect \')\' after for clauses");
 
-    Stmt<R>* body = statement();
+    std::shared_ptr<Stmt<R>> body = statement();
 
     if (increment != nullptr) {
-        std::vector<Stmt<R>*> statements;
+        std::vector<std::shared_ptr<Stmt<R>>> statements;
         statements.push_back(body);
-        statements.push_back(new Expression<R>(increment));
-        body = new Block<R>(statements);
+        statements.push_back(std::make_shared<Expression<R>>(increment));
+        body = std::make_shared<Block<R>>(statements);
     }
     if (condition == nullptr) {
-        condition = new Literal<R>(true);
+        condition = std::make_shared<Literal<R>>(true);
     }
-    body = new While<R>(condition, body);
+    body = std::make_shared<While<R>>(condition, body);
 
     if (initializer != nullptr) {
-        std::vector<Stmt<R>*> statements;
+        std::vector<std::shared_ptr<Stmt<R>>> statements;
         statements.push_back(initializer);
         statements.push_back(body);
-        body = new Block<R>(statements);
+        body = std::make_shared<Block<R>>(statements);
     }
 
     return body;
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::statement() {
+std::shared_ptr<Stmt<R>> Parser<R>::statement() {
     if (match({FOR})) {
         return forStatement();
     }
@@ -464,39 +462,39 @@ Stmt<R>* Parser<R>::statement() {
         return whileStatement();
     }
     if (match({LEFT_BRACE})) {
-        return new Block<R>(block());
+        return std::make_shared<Block<R>>(block());
     }
     return expressionStatement();
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::classDeclaration() {
-    Token* name = consume(IDENTIFIER, "Expect class name");
+std::shared_ptr<Stmt<R>> Parser<R>::classDeclaration() {
+    std::shared_ptr<Token> name = consume(IDENTIFIER, "Expect class name");
     consume(LEFT_BRACE, "Expect { before class declaration");
-    std::vector<Stmt<R>*> methods;
+    std::vector<std::shared_ptr<Stmt<R>>> methods;
     while(!check(RIGHT_BRACE) && !isAtEnd()) {
         methods.push_back(function("method"));
     }
 
     consume(RIGHT_BRACE, "Expect } before class declaration");
-    return new Class(name, methods);
+    return std::make_shared<Class<R>>(name, methods);
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::varDeclaration() {
-    Token* name = consume(IDENTIFIER, "Expect variable name");
+std::shared_ptr<Stmt<R>> Parser<R>::varDeclaration() {
+    std::shared_ptr<Token> name = consume(IDENTIFIER, "Expect variable name");
 
-    Expr<R>* initializer = nullptr;
+    std::shared_ptr<Expr<R>> initializer = nullptr;
     if (match({EQUAL})) {
         initializer = expression();
     }
 
     consume(SEMICOLON, "Expect \';\' after variable declaration.");
-    return new Var<R>(name, initializer);
+    return std::make_shared<Var<R>>(name, initializer);
 }
 
 template <typename R>
-Stmt<R>* Parser<R>::declaration() {
+std::shared_ptr<Stmt<R>> Parser<R>::declaration() {
     try {
         if (match({CLASS})) return classDeclaration();
         if (match({FUN})) return function("function");
@@ -510,8 +508,8 @@ Stmt<R>* Parser<R>::declaration() {
 
 
 template <typename R>
-std::vector<Stmt<R>*> Parser<R>::parse() {
-    std::vector<Stmt<R>*> statements;
+std::vector<std::shared_ptr<Stmt<R>>> Parser<R>::parse() {
+    std::vector<std::shared_ptr<Stmt<R>>> statements;
     while(!isAtEnd()){
         statements.push_back(declaration());
     }

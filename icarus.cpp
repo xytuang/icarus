@@ -75,7 +75,7 @@ void Icarus::report(int line, std::string where, std::string message) {
     hadError = true;
 }
 
-void Icarus::error(Token* token, std::string message){
+void Icarus::error(std::shared_ptr<Token> token, std::string message){
     if (token->getType() == END_OF_FILE){
         report(token->getLine(), " at end ",  message);
     }

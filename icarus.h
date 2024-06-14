@@ -2,6 +2,8 @@
 #define ICARUS_H
 
 #include <string>
+#include <memory>
+
 #include "interpreter.h"
 #include "token.h"
 #include "runtime_error.h"
@@ -21,7 +23,7 @@ class Icarus {
 
         static void report(int line, std::string where, std::string message);
 
-        static void error(Token* token, std::string message);
+        static void error(std::shared_ptr<Token> token, std::string message);
         
         static void error(int line, std::string message);
 
