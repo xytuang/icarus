@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <any>
+#include <memory>
 
 #include "icarus_callable.h"
 #include "interpreter.h"
@@ -12,12 +13,12 @@
 template <typename R>
 class IcarusFunction;
 
-class IcarusClass : public IcarusCallable {
+class IcarusClass : public IcarusCallable, public enable_shared_from_this<IcarusClass> {
     public:
         std::string name;
-        unordered_map<std::string, IcarusFunction<std::any>* > methods;
+        unordered_map<std::string, std::shared_ptr<IcarusFunction<std::any>>> methods;
 
-        IcarusClass(std::string name, unordered_map<std::string, IcarusFunction<std::any>*> methods);
+        IcarusClass(std::string name, unordered_map<std::string, std::shared_ptr<IcarusFunction<std::any>>> methods);
 
         std::string toString();
 
@@ -25,7 +26,9 @@ class IcarusClass : public IcarusCallable {
 
         std::any call(Interpreter* interpreter, std::vector<std::any> arguments);
 
-        IcarusFunction<std::any>* findMethod(std::string name);
+        std::shared_ptr<IcarusFunction<std::any>> findMethod(std::string name);
+
+        std::shared_ptr<IcarusClass> getSharedPtr();
 
 };
 

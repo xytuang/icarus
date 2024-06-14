@@ -22,20 +22,20 @@ Interpreter::Interpreter() {
     this->env = globals;
 }
 
-std::any Interpreter::evaluate(Expr<std::any>* expr) {
+std::any Interpreter::evaluate(std::shared_ptr<Expr<std::any>> expr) {
     return expr->accept(this);
 }
 
-std::any Interpreter::execute(Stmt<std::any>* stmt) {
+std::any Interpreter::execute(std::shared_ptr<Stmt<std::any>> stmt) {
     stmt->accept(this);
     return nullptr;
 }
 
-void Interpreter::resolve(Expr<std::any>* expr, int depth) {
+void Interpreter::resolve(std::shared_ptr<Expr<std::any>> expr, int depth) {
     this->locals[expr] = depth;
 }
 
-std::any Interpreter::lookupVariable(Token* name, Expr<std::any>* expr) {
+std::any Interpreter::lookupVariable(std::shared_ptr<Token> name, std::shared_ptr<Expr<std::any>> expr) {
     if (this->locals.find(expr) != this->locals.end()) {
         int distance = this->locals[expr];
         return this->env->getAt(distance, name->getLexeme());
@@ -81,14 +81,14 @@ bool Interpreter::isTruthy(std::any object) {
 
 }
 
-void Interpreter::checkNumberOperand(Token* operation, std::any operand) {
+void Interpreter::checkNumberOperand(std::shared_ptr<Token> operation, std::any operand) {
     if (operand.type() == typeid(double)) {
         return;
     }
     throw new RuntimeError(operation, "Operand must be a number");
 }
 
-void Interpreter::checkNumberOperands(Token* operation, std::any left, std::any right) {
+void Interpreter::checkNumberOperands(std::shared_ptr<Token> operation, std::any left, std::any right) {
 
     if (left.type() == typeid(double) && right.type() == typeid(double)) {
         return;
@@ -126,18 +126,18 @@ std::string Interpreter::stringify(std::any object) {
     return "unsupported";
 }
 
-std::any Interpreter::executeBlock(std::vector<Stmt<std::any>*> statements, Environment* environment) {
+std::any Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt<std::any>>> statements, Environment* environment) {
     Environment* previous = this->env;
     this->env = environment;
 
-    for (Stmt<std::any>* statement : statements) {
+    for (std::shared_ptr<Stmt<std::any>> statement : statements) {
         execute(statement);
     }
     this->env = previous;
     return nullptr;
 }
 
-std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
+std::any Interpreter::visitAssignExpr(std::shared_ptr<Assign<std::any>> expr) {
     std::any value = evaluate(expr->value);
     if (this->locals.find(expr) != this->locals.end()) {
         int distance = this->locals[expr];
@@ -149,7 +149,7 @@ std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
     return value;
 }
 
-std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
+std::any Interpreter::visitCallExpr(std::shared_ptr<Call<std::any>> expr) {
     std::any callee = evaluate(expr->callee);
     std::vector<std::any> arguments;
     for (int i = 0; i < expr->arguments.size(); i++) {
@@ -175,7 +175,7 @@ std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
     return callObject->call(this, arguments);
 }
 
-std::any Interpreter::visitGetExpr(Get<std::any>* expr) {
+std::any Interpreter::visitGetExpr(std::shared_ptr<Get<std::any>> expr) {
     std::any object = evaluate(expr->object);
     if (object.type() == typeid(IcarusInstance*)) {
         IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
@@ -183,7 +183,7 @@ std::any Interpreter::visitGetExpr(Get<std::any>* expr) {
     }
     throw new RuntimeError(expr->name, "Only instances have properties");
 }
-std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
+std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary<std::any>> expr){
     std::any left = evaluate(expr->left);
     std::any right = evaluate(expr->right);
 
@@ -265,15 +265,15 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
 
 
 
-std::any Interpreter::visitGroupingExpr(Grouping<std::any>* expr){
+std::any Interpreter::visitGroupingExpr(std::shared_ptr<Grouping<std::any>> expr){
     return evaluate(expr->expression);
 }
 
-std::any Interpreter::visitLiteralExpr(Literal<std::any>* expr){
+std::any Interpreter::visitLiteralExpr(std::shared_ptr<Literal<std::any>> expr){
     return expr->value;
 }
 
-std::any Interpreter::visitLogicalExpr(Logical<std::any>* expr) {
+std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical<std::any>> expr) {
     std::any left = evaluate(expr->left);
     if (expr->operation->getType() == OR) {
         if (isTruthy(left)) { //short circuit and return true given that left was true
@@ -288,7 +288,7 @@ std::any Interpreter::visitLogicalExpr(Logical<std::any>* expr) {
     return evaluate(expr->right);
 }
 
-std::any Interpreter::visitSetExpr(Set<std::any>* expr) {
+std::any Interpreter::visitSetExpr(std::shared_ptr<Set<std::any>> expr) {
     std::any object = evaluate(expr->object);
 
     if (object.type() != typeid(IcarusInstance*)) {
@@ -301,11 +301,11 @@ std::any Interpreter::visitSetExpr(Set<std::any>* expr) {
 
 }
 
-std::any Interpreter::visitThisExpr(This<std::any>* expr) {
+std::any Interpreter::visitThisExpr(std::shared_ptr<This<std::any>> expr) {
     return lookupVariable(expr->keyword, expr);
 }
 
-std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
+std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary<std::any>> expr){
     std::any right = evaluate(expr->right);
     switch(expr->operation->getType()) {
         case BANG:
@@ -322,43 +322,43 @@ std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
 }
 
 
-std::any Interpreter::visitVariableExpr(Variable<std::any>* expr) {
+std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable<std::any>> expr) {
     return lookupVariable(expr->name, expr);
 }
 
 //STATEMENTS
 
-std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
+std::any Interpreter::visitBlockStmt(std::shared_ptr<Block<std::any>> stmt) {
     executeBlock(stmt->statements, new Environment(this->env));
     return nullptr;
 }
 
-std::any Interpreter::visitClassStmt(Class<std::any>* stmt) {
+std::any Interpreter::visitClassStmt(std::shared_ptr<Class<std::any>> stmt) {
     this->env->define(stmt->name->getLexeme(), nullptr);
     unordered_map<std::string, IcarusFunction<std::any>*> methods;
-    for (Stmt<std::any>* method : stmt->methods) {
-        Function<std::any>* methodObj = dynamic_cast<Function<std::any>*>(method);
+    for (std::shared_ptr<Stmt<std::any>> method : stmt->methods) {
+        std::shared_ptr<Function<std::any>> methodObj = dynamic_pointer_cast<Function<std::any>>(method);
         IcarusFunction<std::any>* function = new IcarusFunction(methodObj, this->env, methodObj->name->getLexeme() == "init");
-        methods[dynamic_cast<Function<std::any>*>(method)->name->getLexeme()] = function;
+        methods[dynamic_pointer_cast<Function<std::any>>(method)->name->getLexeme()] = function;
     }
     IcarusClass* klass = new IcarusClass(stmt->name->getLexeme(), methods);
     this->env->assign(stmt->name, klass);
     return nullptr;
 }
 
-std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
+std::any Interpreter::visitExpressionStmt(std::shared_ptr<Expression<std::any>> stmt) {
     evaluate(stmt->expression);
     return nullptr;
 }
 
 
-std::any Interpreter::visitFunctionStmt(Function<std::any>* stmt) {
+std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function<std::any>> stmt) {
     IcarusFunction<std::any>* function = new IcarusFunction<std::any>(stmt, this->env, false);
     this->env->define(stmt->name->getLexeme(), function);
     return nullptr;
 }
 
-std::any Interpreter::visitIfStmt(If<std::any>* stmt) {
+std::any Interpreter::visitIfStmt(std::shared_ptr<If<std::any>> stmt) {
     if (isTruthy(evaluate(stmt->condition))) {
         execute(stmt->thenBranch);
     }
@@ -368,13 +368,13 @@ std::any Interpreter::visitIfStmt(If<std::any>* stmt) {
     return nullptr;
 }
 
-std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
+std::any Interpreter::visitPrintStmt(std::shared_ptr<Print<std::any>> stmt) {
     std::any value = evaluate(stmt->expression);
     std::cout << stringify(value) << std::endl;
     return nullptr;
 }
 
-std::any Interpreter::visitReturnStmt(Return<std::any>* stmt) {
+std::any Interpreter::visitReturnStmt(std::shared_ptr<Return<std::any>> stmt) {
     std::any value = nullptr;
     if (stmt->value != nullptr) {
         value = evaluate(stmt->value);
@@ -382,7 +382,7 @@ std::any Interpreter::visitReturnStmt(Return<std::any>* stmt) {
     throw new StackUnwinder(value);
 }
 
-std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
+std::any Interpreter::visitVarStmt(std::shared_ptr<Var<std::any>> stmt) {
     std::any value = nullptr;
     if (stmt->initializer != nullptr) {
         value = evaluate(stmt->initializer);
@@ -391,15 +391,15 @@ std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
     return nullptr;
 }
 
-std::any Interpreter::visitWhileStmt(While<std::any>* stmt) {
+std::any Interpreter::visitWhileStmt(std::shared_ptr<While<std::any>> stmt) {
     while (isTruthy(evaluate(stmt->condition))) {
         execute(stmt->body);
     }
     return nullptr;
 }
-std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
+std::any Interpreter::interpret(std::vector<std::shared_ptr<Stmt<std::any>>> statements) {
     try {
-        for (Stmt<std::any>* stmt : statements) {
+        for (std::shared_ptr<Stmt<std::any>> stmt : statements) {
             execute(stmt);
         }
     } catch (RuntimeError* error){

@@ -14,7 +14,7 @@
 class Scanner {
     private:
         std::string source;
-        std::vector<shared_ptr<Token>> tokens;
+        std::vector<std::shared_ptr<Token>> tokens;
         int start;
         int current;
         int line;
@@ -51,6 +51,6 @@ class Scanner {
     public:
         Scanner(std::string source);
 
-        std::vector<shared_ptr<Token>> scanTokens();
+        std::vector<std::shared_ptr<Token>> scanTokens();
 };
 #endif

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 #include "token.h"
 #include "expr.h"
@@ -19,17 +20,17 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
         FunctionType currentFunction = FunctionType::NONE;
 
 
-        void resolve(Expr<std::any>* expr);
+        void resolve(std::shared_ptr<Expr<std::any>> expr);
 
-        void resolve(Stmt<std::any>* stmt);
+        void resolve(std::shared_ptr<Stmt<std::any>> stmt);
 
-        void declare(Token* name);
+        void declare(std::shared_ptr<Token> name);
 
-        void define(Token* name);
+        void define(std::shared_ptr<Token> name);
 
-        void resolveLocal(Expr<std::any>* expr, Token* name);
+        void resolveLocal(std::shared_ptr<Expr<std::any>> expr, std::shared_ptr<Token> name);
 
-        void resolveFunction(Function<std::any>* function, FunctionType type);
+        void resolveFunction(std::shared_ptr<Function<std::any>> function, FunctionType type);
 
         void beginScope();
 
@@ -42,49 +43,49 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
 
         Resolver(Interpreter* interpreter);
 
-        void resolve(std::vector<Stmt<std::any>*> statements);
+        void resolve(std::vector<std::shared_ptr<Stmt<std::any>>> statements);
 
-        std::any visitBlockStmt(Block<std::any>* stmt);
+        std::any visitBlockStmt(std::shared_ptr<Block<std::any>> stmt);
 
-        std::any visitClassStmt(Class<std::any>* stmt);
+        std::any visitClassStmt(std::shared_ptr<Class<std::any>> stmt);
 
-        std::any visitVarStmt(Var<std::any>* stmt);
+        std::any visitVarStmt(std::shared_ptr<Var<std::any>> stmt);
 
-        std::any visitFunctionStmt(Function<std::any>* stmt);
+        std::any visitFunctionStmt(std::shared_ptr<Function<std::any>> stmt);
 
-        std::any visitExpressionStmt(Expression<std::any>* stmt);
+        std::any visitExpressionStmt(std::shared_ptr<Expression<std::any>> stmt);
 
-        std::any visitIfStmt(If<std::any>* stmt);
+        std::any visitIfStmt(std::shared_ptr<If<std::any>> stmt);
 
-        std::any visitPrintStmt(Print<std::any>* stmt);
+        std::any visitPrintStmt(std::shared_ptr<Print<std::any>> stmt);
 
-        std::any visitReturnStmt(Return<std::any>* stmt);
+        std::any visitReturnStmt(std::shared_ptr<Return<std::any>> stmt);
 
-        std::any visitWhileStmt(While<std::any>* stmt);
+        std::any visitWhileStmt(std::shared_ptr<While<std::any>> stmt);
 
 
 
-        std::any visitAssignExpr(Assign<std::any>* expr);
+        std::any visitAssignExpr(std::shared_ptr<Assign<std::any>> expr);
 
-        std::any visitVariableExpr(Variable<std::any>* expr);
+        std::any visitVariableExpr(std::shared_ptr<Variable<std::any>> expr);
 
-        std::any visitBinaryExpr(Binary<std::any>* expr);
+        std::any visitBinaryExpr(std::shared_ptr<Binary<std::any>> expr);
 
-        std::any visitCallExpr(Call<std::any>* expr);
+        std::any visitCallExpr(std::shared_ptr<Call<std::any>> expr);
 
-        std::any visitGetExpr(Get<std::any>* expr);
+        std::any visitGetExpr(std::shared_ptr<Get<std::any>> expr);
  
-        std::any visitGroupingExpr(Grouping<std::any>* expr);
+        std::any visitGroupingExpr(std::shared_ptr<Grouping<std::any>> expr);
 
-        std::any visitLiteralExpr(Literal<std::any>* expr);
+        std::any visitLiteralExpr(std::shared_ptr<Literal<std::any>> expr);
 
-        std::any visitLogicalExpr(Logical<std::any>* expr);
+        std::any visitLogicalExpr(std::shared_ptr<Logical<std::any>> expr);
 
-        std::any visitSetExpr(Set<std::any>* expr);
+        std::any visitSetExpr(std::shared_ptr<Set<std::any>> expr);
 
-        std::any visitThisExpr(This<std::any>* expr);
+        std::any visitThisExpr(std::shared_ptr<This<std::any>> expr);
 
-        std::any visitUnaryExpr(Unary<std::any>* expr);
+        std::any visitUnaryExpr(std::shared_ptr<Unary<std::any>> expr);
 };
 
 

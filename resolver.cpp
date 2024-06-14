@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "token.h"
 #include "stmt.h"
@@ -16,22 +17,22 @@ Resolver::Resolver(Interpreter* interpreter) {
 
 
 
-void Resolver::resolve(Expr<std::any>* expr) {
+void Resolver::resolve(std::shared_ptr<Expr<std::any>> expr) {
     expr->accept(this);
 }
 
-void Resolver::resolve(Stmt<std::any>* stmt) {
+void Resolver::resolve(std::shared_ptr<Stmt<std::any>> stmt) {
     stmt->accept(this);
 }
 
 
-void Resolver::resolve(std::vector<Stmt<std::any>*> statements) {
-    for (Stmt<std::any>* stmt : statements) {
+void Resolver::resolve(std::vector<std::shared_ptr<Stmt<std::any>>> statements) {
+    for (std::shared_ptr<Stmt<std::any>> stmt : statements) {
         resolve(stmt);
     }
 }
 
-void Resolver::declare(Token* name) {
+void Resolver::declare(std::shared_ptr<Token> name) {
     if (this->scopes.size() == 0) {
         return;
     }
@@ -43,14 +44,14 @@ void Resolver::declare(Token* name) {
     return;
 }
 
-void Resolver::define(Token* name) {
+void Resolver::define(std::shared_ptr<Token> name) {
     if (this->scopes.size() == 0) {
         return;
     }
     this->scopes.back()[name->getLexeme()] = true;
 }
 
-void Resolver::resolveLocal(Expr<std::any>* expr, Token* name) {
+void Resolver::resolveLocal(std::shared_ptr<Expr<std::any>> expr, std::shared_ptr<Token> name) {
     for (int i = this->scopes.size() - 1; i >= 0; i--) {
         if (this->scopes[i].find(name->getLexeme()) != this->scopes[i].end()) {
             this->interpreter->resolve(expr, this->scopes.size() - 1 - i);
@@ -59,13 +60,13 @@ void Resolver::resolveLocal(Expr<std::any>* expr, Token* name) {
     }
 }
 
-void Resolver::resolveFunction(Function<std::any>* function, FunctionType type) {
+void Resolver::resolveFunction(std::shared_ptr<Function<std::any>> function, FunctionType type) {
     // handle rogue return statements
     FunctionType enclosingFunction = this->currentFunction;
     this->currentFunction = type;
 
     beginScope();
-    for (Token* param : function->params) {
+    for (std::shared_ptr<Token> param : function->params) {
         declare(param);
         define(param);
     }
@@ -84,14 +85,14 @@ void Resolver::endScope() {
     this->scopes.pop_back();
 }
 
-std::any Resolver::visitBlockStmt(Block<std::any>* stmt) {
+std::any Resolver::visitBlockStmt(std::shared_ptr<Block<std::any>> stmt) {
     beginScope();
     resolve(stmt->statements);
     endScope();
     return nullptr;
 }
 
-std::any Resolver::visitClassStmt(Class<std::any>* stmt) {
+std::any Resolver::visitClassStmt(std::shared_ptr<Class<std::any>> stmt) {
     ClassType enclosingClass = this->currentClass;
     this->currentClass = ClassType::CLASS;
     declare(stmt->name);
@@ -99,20 +100,20 @@ std::any Resolver::visitClassStmt(Class<std::any>* stmt) {
 
     beginScope();
     scopes.back()["this"] = true;
-    for (Stmt<std::any>* method : stmt->methods) {
+    for (std::shared_ptr<Stmt<std::any>> method : stmt->methods) {
         FunctionType declaration = FunctionType::METHOD;
-        Function<std::any>* functionObj = dynamic_cast<Function<std::any>*>(method);
+        std::shared_ptr<Function<std::any>> functionObj = dynamic_pointer_cast<std::shared_ptr<Function<std::any>>>(method);
         if (functionObj->name->getLexeme() == "init") {
             declaration = FunctionType::INITIALIZER;
         }
-        resolveFunction(dynamic_cast<Function<std::any>*>(method), declaration);
+        resolveFunction(dynamic_pointer_cast<std::shared_ptr<Function<std::any>>(method), declaration);
     }
     endScope();
     this->currentClass = enclosingClass;
     return nullptr;
 }
 
-std::any Resolver::visitVarStmt(Var<std::any>* stmt) {
+std::any Resolver::visitVarStmt(std::shared_ptr<Var<std::any>> stmt) {
     declare(stmt->name);
     if (stmt->initializer != nullptr) {
         resolve(stmt->initializer);
@@ -121,7 +122,7 @@ std::any Resolver::visitVarStmt(Var<std::any>* stmt) {
     return nullptr;
 }
 
-std::any Resolver::visitFunctionStmt(Function<std::any>* stmt) {
+std::any Resolver::visitFunctionStmt(std::shared_ptr<Function<std::any>> stmt) {
     declare(stmt->name);
     define(stmt->name);
 
@@ -129,12 +130,12 @@ std::any Resolver::visitFunctionStmt(Function<std::any>* stmt) {
     return nullptr;
 }
 
-std::any Resolver::visitExpressionStmt(Expression<std::any>* stmt) {
+std::any Resolver::visitExpressionStmt(std::shared_ptr<Expression<std::any>> stmt) {
     resolve(stmt->expression);
     return nullptr;
 }
 
-std::any Resolver::visitIfStmt(If<std::any>* stmt) {
+std::any Resolver::visitIfStmt(std::shared_ptr<If<std::any>> stmt) {
     resolve(stmt->condition);
     resolve(stmt->thenBranch);
     if (stmt->elseBranch != nullptr) {
@@ -144,13 +145,12 @@ std::any Resolver::visitIfStmt(If<std::any>* stmt) {
 }
 
 
-
-std::any Resolver::visitPrintStmt(Print<std::any>* stmt) {
+std::any Resolver::visitPrintStmt(std::shared_ptr<Print<std::any>> stmt) {
     resolve(stmt->expression);
     return nullptr;
 }
 
-std::any Resolver::visitReturnStmt(Return<std::any>* stmt) {
+std::any Resolver::visitReturnStmt(std::shared_ptr<Return<std::any>> stmt) {
     if (this->currentFunction == FunctionType::NONE) {
         Icarus::error(stmt->keyword, "Can't return from top level code");
     }
@@ -163,20 +163,20 @@ std::any Resolver::visitReturnStmt(Return<std::any>* stmt) {
     return nullptr;
 }
 
-std::any Resolver::visitWhileStmt(While<std::any>* stmt) {
+std::any Resolver::visitWhileStmt(std::shared_ptr<While<std::any>> stmt) {
     resolve(stmt->condition);
     resolve(stmt->body);
     return nullptr;
 }
 
 
-std::any Resolver::visitAssignExpr(Assign<std::any>* expr) {
+std::any Resolver::visitAssignExpr(std::shared_ptr<Assign<std::any>> expr) {
     resolve(expr->value);
     resolveLocal(expr, expr->name);
     return nullptr;
 }
 
-std::any Resolver::visitVariableExpr(Variable<std::any>* expr) {
+std::any Resolver::visitVariableExpr(std::shared_ptr<Variable<std::any>> expr) {
     if (this->scopes.size() != 0 && this->scopes.back()[expr->name->getLexeme()] == false) {
         Icarus::error(expr->name, "Can't read local variable in its own initializer");
     }
@@ -184,50 +184,50 @@ std::any Resolver::visitVariableExpr(Variable<std::any>* expr) {
     return nullptr;
 }
 
-std::any Resolver::visitBinaryExpr(Binary<std::any>* expr) {
+std::any Resolver::visitBinaryExpr(std::shared_ptr<Binary<std::any>> expr) {
     resolve(expr->left);
     resolve(expr->right);
     return nullptr;
 }
 
-std::any Resolver::visitCallExpr(Call<std::any>* expr) {
+std::any Resolver::visitCallExpr(std::shared_ptr<Call<std::any>> expr) {
     resolve(expr->callee);
-    for (Expr<std::any>* arg : expr->arguments) {
+    for (std::shared_ptr<Expr<std::any>> arg : expr->arguments) {
         resolve(arg);
     }
     return nullptr;
 }
 
-std::any Resolver::visitGetExpr(Get<std::any>* expr) {
+std::any Resolver::visitGetExpr(std::shared_ptr<Get<std::any>> expr) {
     resolve(expr->object);
     return nullptr;
 }
 
-std::any Resolver::visitGroupingExpr(Grouping<std::any>* expr) {
+std::any Resolver::visitGroupingExpr(std::shared_ptr<Grouping<std::any>> expr) {
     resolve(expr->expression);
     return nullptr;
 }
 
 
-std::any Resolver::visitLiteralExpr(Literal<std::any>* expr) {
+std::any Resolver::visitLiteralExpr(std::shared_ptr<Literal<std::any>> expr) {
     return nullptr;
 }
 
 
-std::any Resolver::visitLogicalExpr(Logical<std::any>* expr) {
+std::any Resolver::visitLogicalExpr(std::shared_ptr<Logical<std::any>> expr) {
     resolve(expr->left);
     resolve(expr->right);
     return nullptr;
 }
 
-std::any Resolver::visitSetExpr(Set<std::any>* expr) {
+std::any Resolver::visitSetExpr(std::shared_ptr<Set<std::any>> expr) {
     resolve(expr->value);
     resolve(expr->object);
     return nullptr;
 }
 
 
-std::any Resolver::visitThisExpr(This<std::any>* expr) {
+std::any Resolver::visitThisExpr(std::shared_ptr<This<std::any>> expr) {
     if (this->currentClass == ClassType::NONE) {
         Icarus::error(expr->keyword, "Can't use \'this\' outside of class");
         return nullptr;
@@ -236,7 +236,7 @@ std::any Resolver::visitThisExpr(This<std::any>* expr) {
     return nullptr;
 }
 
-std::any Resolver::visitUnaryExpr(Unary<std::any>* expr) {
+std::any Resolver::visitUnaryExpr(std::shared_ptr<Unary<std::any>> expr) {
     resolve(expr->right);
     return nullptr;
 }

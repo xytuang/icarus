@@ -5,24 +5,26 @@
 #include <unordered_map>
 #include <any>
 #include <string>
+#include <memory>
 
 #include "token.h"
 
 class IcarusClass;
 
-class IcarusInstance {
+class IcarusInstance : public std::enable_shared_from_this<IcarusInstance> {
     private:
-        IcarusClass* klass;
+        std::shared_ptr<IcarusClass> klass;
         std::unordered_map<std::string, std::any> fields;
     public:
-        IcarusInstance(IcarusClass* klass);
+        IcarusInstance(std::shared_ptr<IcarusClass> klass);
 
         std::string toString();
 
-        std::any get(Token* name);
+        std::any get(std::shared_ptr<Token> name);
 
-        void set(Token* name, std::any value);
+        void set(std::shared_ptr<Token> name, std::any value);
 
+        std::shared_ptr<IcarusInstance> getSharedPtr();
 };
 
 

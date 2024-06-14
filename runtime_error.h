@@ -3,12 +3,14 @@
 
 #include <stdexcept>
 #include <string>
+#include <memory>
+
 #include "token.h"
 
 class RuntimeError : public std::runtime_error {
 public:
-    Token* token;
-    RuntimeError(Token* token, const std::string& message) : std::runtime_error(message), token(token) {}
+    std::shared_ptr<Token> token;
+    RuntimeError(std::shared_ptr<Token> token, const std::string& message) : std::runtime_error(message), token(token) {}
 
 };
 

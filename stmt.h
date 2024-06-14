@@ -23,15 +23,15 @@ public:
     template <typename T>
     class Visitor {
     public:
-        virtual T visitBlockStmt (Block<R>* stmt) = 0;
-        virtual T visitClassStmt (Class<R>* stmt) = 0;
-        virtual T visitExpressionStmt (Expression<R>* stmt) = 0;
-        virtual T visitFunctionStmt (Function<R>* stmt) = 0;
-        virtual T visitIfStmt (If<R>* stmt) = 0;
-        virtual T visitPrintStmt (Print<R>* stmt) = 0;
-        virtual T visitReturnStmt (Return<R>* stmt) = 0;
-        virtual T visitVarStmt (Var<R>* stmt) = 0;
-        virtual T visitWhileStmt (While<R>* stmt) = 0;
+        virtual T visitBlockStmt (shared_ptr<Block<R>> stmt) = 0;
+        virtual T visitClassStmt (shared_ptr<Class<R>> stmt) = 0;
+        virtual T visitExpressionStmt (shared_ptr<Expression<R>> stmt) = 0;
+        virtual T visitFunctionStmt (shared_ptr<Function<R>> stmt) = 0;
+        virtual T visitIfStmt (shared_ptr<If<R>> stmt) = 0;
+        virtual T visitPrintStmt (shared_ptr<Print<R>> stmt) = 0;
+        virtual T visitReturnStmt (shared_ptr<Return<R>> stmt) = 0;
+        virtual T visitVarStmt (shared_ptr<Var<R>> stmt) = 0;
+        virtual T visitWhileStmt (shared_ptr<While<R>> stmt) = 0;
         virtual ~Visitor() = default;
     };
 
@@ -40,19 +40,22 @@ public:
 };
 
 template <typename R>
-class Block : public Stmt<R> {
+class Block : public Stmt<R>, public enable_shared_from_this<Block<R>> {
 public:
     vector<shared_ptr<Stmt<R>>> statements;
     Block(vector<shared_ptr<Stmt<R>>> statements) {
         this->statements=statements;
     }
+    shared_ptr<Block<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitBlockStmt(this);
+        return visitor->visitBlockStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class Class : public Stmt<R> {
+class Class : public Stmt<R>, public enable_shared_from_this<Class<R>> {
 public:
     shared_ptr<Token> name;
     vector<shared_ptr<Stmt<R>>> methods;
@@ -60,25 +63,31 @@ public:
         this->name=name;
         this->methods=methods;
     }
+    shared_ptr<Class<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitClassStmt(this);
+        return visitor->visitClassStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class Expression : public Stmt<R> {
+class Expression : public Stmt<R>, public enable_shared_from_this<Expression<R>> {
 public:
     shared_ptr<Expr<R>> expression;
     Expression(shared_ptr<Expr<R>> expression) {
         this->expression=expression;
     }
+    shared_ptr<Expression<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitExpressionStmt(this);
+        return visitor->visitExpressionStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class Function : public Stmt<R> {
+class Function : public Stmt<R>, public enable_shared_from_this<Function<R>> {
 public:
     shared_ptr<Token> name;
     vector<shared_ptr<Token>> params;
@@ -88,13 +97,16 @@ public:
         this->params=params;
         this->body=body;
     }
+    shared_ptr<Function<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitFunctionStmt(this);
+        return visitor->visitFunctionStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class If : public Stmt<R> {
+class If : public Stmt<R>, public enable_shared_from_this<If<R>> {
 public:
     shared_ptr<Expr<R>> condition;
     shared_ptr<Stmt<R>> thenBranch;
@@ -104,25 +116,31 @@ public:
         this->thenBranch=thenBranch;
         this->elseBranch=elseBranch;
     }
+    shared_ptr<If<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitIfStmt(this);
+        return visitor->visitIfStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class Print : public Stmt<R> {
+class Print : public Stmt<R>, public enable_shared_from_this<Print<R>> {
 public:
     shared_ptr<Expr<R>> expression;
     Print(shared_ptr<Expr<R>> expression) {
         this->expression=expression;
     }
+    shared_ptr<Print<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitPrintStmt(this);
+        return visitor->visitPrintStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class Return : public Stmt<R> {
+class Return : public Stmt<R>, public enable_shared_from_this<Return<R>> {
 public:
     shared_ptr<Token> keyword;
     shared_ptr<Expr<R>> value;
@@ -130,13 +148,16 @@ public:
         this->keyword=keyword;
         this->value=value;
     }
+    shared_ptr<Return<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitReturnStmt(this);
+        return visitor->visitReturnStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class Var : public Stmt<R> {
+class Var : public Stmt<R>, public enable_shared_from_this<Var<R>> {
 public:
     shared_ptr<Token> name;
     shared_ptr<Expr<R>> initializer;
@@ -144,13 +165,16 @@ public:
         this->name=name;
         this->initializer=initializer;
     }
+    shared_ptr<Var<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitVarStmt(this);
+        return visitor->visitVarStmt(getSharedPtr());
     }
 };
 
 template <typename R>
-class While : public Stmt<R> {
+class While : public Stmt<R>, public enable_shared_from_this<While<R>> {
 public:
     shared_ptr<Expr<R>> condition;
     shared_ptr<Stmt<R>> body;
@@ -158,8 +182,11 @@ public:
         this->condition=condition;
         this->body=body;
     }
+    shared_ptr<While<R>> getSharedPtr() {
+        return this->shared_from_this();
+    }
     R accept(typename Stmt<R>::template Visitor<R>* visitor) override {
-        return visitor->visitWhileStmt(this);
+        return visitor->visitWhileStmt(getSharedPtr());
     }
 };
 

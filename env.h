@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <any>
 #include <iostream>
+#include <memory>
+
 #include "token.h"
 #include "runtime_error.h"
 
@@ -25,7 +27,7 @@ class Environment {
             values[name] = value;
         }
 
-        std::any get(Token* name) {
+        std::any get(std::shared_ptr<Token> name) {
             if (values.find(name->getLexeme()) != values.end()) {
                 return values[name->getLexeme()];
             }
@@ -50,11 +52,11 @@ class Environment {
         }
 
         // part of resolution
-        void assignAt(int distance, Token* name, std::any value) {
+        void assignAt(int distance, std::shared_ptr<Token> name, std::any value) {
             ancestor(distance)->values[name->getLexeme()] = value;
         }
 
-        void assign(Token* name, std::any value) {
+        void assign(std::shared_ptr<Token> name, std::any value) {
             if (values.find(name->getLexeme()) != values.end()) {
                 values[name->getLexeme()] = value;
                 return;

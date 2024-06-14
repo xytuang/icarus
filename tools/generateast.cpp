@@ -59,7 +59,7 @@ void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std:
         for (int i = 0; i < baseLower.size(); i++) {
             baseLower[i] = tolower(baseLower[i]);
         }
-        outFile << "        virtual T visit" << typeName << baseName << " (" << typeName << "<R>* " << baseLower << ") = 0;" << std::endl;
+        outFile << "        virtual T visit" << typeName << baseName << " (shared_ptr<" << typeName << "<R>> " << baseLower << ") = 0;" << std::endl;
     }
     outFile << "        virtual ~Visitor() = default;" << std::endl;
     outFile << "    };" << std::endl;
@@ -68,7 +68,7 @@ void defineVisitor(std::ostream& outFile, std::string baseName, std::vector<std:
 
 void defineType(std::ofstream& outFile, std::string baseName, std::string className, std::string fields) {
     outFile << "template <typename R>" << std::endl;
-    outFile << "class " << className << " : public " << baseName << "<R> {" << std::endl;
+    outFile << "class " << className << " : public " << baseName << "<R>, public enable_shared_from_this<" << className << "<R>> {" << std::endl;
     outFile << "public:" << std::endl;
     std::vector<std::string> fieldList = splitString(fields, ',');
     for (int i = 0; i < fieldList.size(); i++) {
@@ -83,9 +83,15 @@ void defineType(std::ofstream& outFile, std::string baseName, std::string classN
         outFile << "        this->" << name << "=" << name << ";" << std::endl;   
     }
     outFile << "    }" << std::endl;
-    outFile << "    R accept(typename " << baseName << "<R>::template Visitor<R>* visitor) override {" << std::endl;
-    outFile << "        return visitor->visit" << className << baseName << "(this);" << std::endl;
+
+    outFile << "    shared_ptr<" << className << "<R>> getSharedPtr() {" << std::endl;
+    outFile << "        return this->shared_from_this();" << std::endl;
     outFile << "    }" << std::endl;
+
+    outFile << "    R accept(typename " << baseName << "<R>::template Visitor<R>* visitor) override {" << std::endl;
+    outFile << "        return visitor->visit" << className << baseName << "(getSharedPtr());" << std::endl;
+    outFile << "    }" << std::endl;
+
     outFile << "};" << std::endl;
     outFile << std::endl;
 

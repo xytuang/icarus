@@ -42,3 +42,4 @@ template <typename R>
 std::string IcarusFunction<R>::toString() {
     return "<fn " + this->declaration->name->getLexeme() + ">";
 }
+

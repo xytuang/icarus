@@ -2,6 +2,8 @@
 #define ERRORS_H
 #include <string>
 #include <iostream>
+#include <memory>
+
 #include "token.h"
 #include "tokentype.h"
 
@@ -12,7 +14,7 @@ void report(int line, std::string where, std::string message) {
     hadError = true;
 }
 
-static void error(Token* token, std::string message){
+static void error(std::shared_ptr<Token> token, std::string message){
     if (token->getType() == END_OF_FILE){
         report(token->getLine(), " at end ",  message);
     }

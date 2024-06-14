@@ -4,6 +4,7 @@
 #include <vector>
 #include <any>
 #include <iostream>
+#include <memory>
 
 #include "icarus_callable.h"
 #include "icarus_instance.h"
@@ -16,36 +17,39 @@
 class IcarusInstance;
 
 template <typename R>
-class IcarusFunction : public IcarusCallable {
+class IcarusFunction : public IcarusCallable, public std::enable_shared_from_this<IcarusFunction<R>> {
     private:
-        Function<R>* declaration;
+        std::shared_ptr<Function<R>> declaration;
         Environment* closure;
         bool isInitializer;
     public:
-        IcarusFunction(Function<R>* declaration, Environment* closure, bool isInitializer);
+        IcarusFunction(std::shared_ptr<Function<R>> declaration, Environment* closure, bool isInitializer);
 
-        IcarusFunction<R>* bind(IcarusInstance* instance);
+        std::shared_ptr<IcarusFunction<R>> bind(std::shared_ptr<IcarusInstance> instance);
 
         int arity();
 
         std::any call(Interpreter* interpreter, std::vector<std::any> arguments);
 
         std::string toString();
+
+        std::shared_ptr<IcarusFunction<R>> getSharedPtr();
+        
 };
 
 
 template <typename R>
-IcarusFunction<R>::IcarusFunction(Function<R>* declaration, Environment* closure, bool isInitializer) {
+IcarusFunction<R>::IcarusFunction(std::shared_ptr<Function<R>> declaration, Environment* closure, bool isInitializer) {
     this->closure = closure;
     this->declaration = declaration;
     this->isInitializer = isInitializer;
 }
 
 template <typename R>
-IcarusFunction<R>* IcarusFunction<R>::bind(IcarusInstance* instance) {
+std::shared_ptr<IcarusFunction<R>> IcarusFunction<R>::bind(std::shared_ptr<IcarusInstance> instance) {
     Environment* environment = new Environment(closure);
     environment->define("this", instance);
-    return new IcarusFunction(declaration, environment, isInitializer);
+    return std::make_shared<IcarusFunction>(declaration, environment, isInitializer);
 }
 
 template <typename R>
@@ -76,4 +80,8 @@ std::string IcarusFunction<R>::toString() {
     return "<fn " + this->declaration->name->getLexeme() + ">";
 }
 
+template <typename R>
+std::shared_ptr<IcarusFunction<R>> IcarusFunction<R>::getSharedPtr() {
+    return this->shared_from_this();
+}
 #endif
