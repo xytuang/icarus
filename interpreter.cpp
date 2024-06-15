@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 #include "interpreter.h"
 #include "env.h"
@@ -335,13 +336,13 @@ std::any Interpreter::visitBlockStmt(std::shared_ptr<Block<std::any>> stmt) {
 
 std::any Interpreter::visitClassStmt(std::shared_ptr<Class<std::any>> stmt) {
     this->env->define(stmt->name->getLexeme(), nullptr);
-    unordered_map<std::string, IcarusFunction<std::any>*> methods;
+    unordered_map<std::string, std::shared_ptr<IcarusFunction<std::any>>> methods;
     for (std::shared_ptr<Stmt<std::any>> method : stmt->methods) {
         std::shared_ptr<Function<std::any>> methodObj = dynamic_pointer_cast<Function<std::any>>(method);
-        IcarusFunction<std::any>* function = new IcarusFunction(methodObj, this->env, methodObj->name->getLexeme() == "init");
+        std::shared_ptr<IcarusFunction<std::any>> function = std::make_shared<IcarusFunction<std::any>>(methodObj, this->env, methodObj->name->getLexeme() == "init");
         methods[dynamic_pointer_cast<Function<std::any>>(method)->name->getLexeme()] = function;
     }
-    IcarusClass* klass = new IcarusClass(stmt->name->getLexeme(), methods);
+    std::shared_ptr<IcarusClass> klass = std::make_shared<IcarusClass>(stmt->name->getLexeme(), methods);
     this->env->assign(stmt->name, klass);
     return nullptr;
 }
@@ -353,7 +354,7 @@ std::any Interpreter::visitExpressionStmt(std::shared_ptr<Expression<std::any>> 
 
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function<std::any>> stmt) {
-    IcarusFunction<std::any>* function = new IcarusFunction<std::any>(stmt, this->env, false);
+    std::shared_ptr<IcarusFunction<std::any>> function = std::make_shared<IcarusFunction<std::any>>(stmt, this->env, false);
     this->env->define(stmt->name->getLexeme(), function);
     return nullptr;
 }

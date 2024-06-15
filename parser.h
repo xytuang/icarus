@@ -298,7 +298,7 @@ std::shared_ptr<Expr<R>> Parser<R>::assignment() {
             std::shared_ptr<Token> name = (dynamic_pointer_cast<Variable<R>>(expr))->name;
             return std::make_shared<Assign<R>>(name, value);
         }
-        else if (dynamic_pointer_cast<Get<R>>(expr)) { //edit needed
+        else if (dynamic_pointer_cast<Get<R>>(expr)) {
             std::shared_ptr<Get<R>> get = dynamic_pointer_cast<Get<R>>(expr);
             return std::make_shared<Set<R>>(get->object, get->name, value);
         }

@@ -26,7 +26,7 @@ int IcarusClass::arity() {
 }
 
 std::any IcarusClass::call(Interpreter* interpreter, std::vector<std::any> arguments) {
-    std::shared_ptr<IcarusInstance> instance = std::make_shared<IcarusInstance>(this);
+    std::shared_ptr<IcarusInstance> instance = std::make_shared<IcarusInstance>(getSharedPtr());
     std::shared_ptr<IcarusFunction<std::any>> initializer = findMethod("init");
     if (initializer != nullptr) {
         initializer->bind(instance)->call(interpreter, arguments);

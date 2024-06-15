@@ -49,7 +49,7 @@ template <typename R>
 std::shared_ptr<IcarusFunction<R>> IcarusFunction<R>::bind(std::shared_ptr<IcarusInstance> instance) {
     Environment* environment = new Environment(closure);
     environment->define("this", instance);
-    return std::make_shared<IcarusFunction>(declaration, environment, isInitializer);
+    return std::make_shared<IcarusFunction<R>>(declaration, environment, isInitializer);
 }
 
 template <typename R>
