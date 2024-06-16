@@ -13,7 +13,7 @@ class IcarusClass;
 
 class IcarusInstance : public std::enable_shared_from_this<IcarusInstance> {
     private:
-        std::shared_ptr<IcarusClass> klass;
+        std::weak_ptr<IcarusClass> klass;
         std::unordered_map<std::string, std::any> fields;
     public:
         IcarusInstance(std::shared_ptr<IcarusClass> klass);
@@ -25,6 +25,7 @@ class IcarusInstance : public std::enable_shared_from_this<IcarusInstance> {
         void set(std::shared_ptr<Token> name, std::any value);
 
         std::shared_ptr<IcarusInstance> getSharedPtr();
+
 };
 
 

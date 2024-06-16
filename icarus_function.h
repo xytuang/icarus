@@ -20,10 +20,10 @@ template <typename R>
 class IcarusFunction : public IcarusCallable, public std::enable_shared_from_this<IcarusFunction<R>> {
     private:
         std::shared_ptr<Function<R>> declaration;
-        Environment* closure;
+        std::shared_ptr<Environment> closure;
         bool isInitializer;
     public:
-        IcarusFunction(std::shared_ptr<Function<R>> declaration, Environment* closure, bool isInitializer);
+        IcarusFunction(std::shared_ptr<Function<R>> declaration, std::shared_ptr<Environment> closure, bool isInitializer);
 
         std::shared_ptr<IcarusFunction<R>> bind(std::shared_ptr<IcarusInstance> instance);
 
@@ -34,12 +34,15 @@ class IcarusFunction : public IcarusCallable, public std::enable_shared_from_thi
         std::string toString();
 
         std::shared_ptr<IcarusFunction<R>> getSharedPtr();
+
+        ~IcarusFunction(){}
+
         
 };
 
 
 template <typename R>
-IcarusFunction<R>::IcarusFunction(std::shared_ptr<Function<R>> declaration, Environment* closure, bool isInitializer) {
+IcarusFunction<R>::IcarusFunction(std::shared_ptr<Function<R>> declaration, std::shared_ptr<Environment> closure, bool isInitializer) {
     this->closure = closure;
     this->declaration = declaration;
     this->isInitializer = isInitializer;
@@ -47,7 +50,7 @@ IcarusFunction<R>::IcarusFunction(std::shared_ptr<Function<R>> declaration, Envi
 
 template <typename R>
 std::shared_ptr<IcarusFunction<R>> IcarusFunction<R>::bind(std::shared_ptr<IcarusInstance> instance) {
-    Environment* environment = new Environment(closure);
+    std::shared_ptr<Environment> environment = std::make_shared<Environment>(this->closure);
     environment->define("this", instance);
     return std::make_shared<IcarusFunction<R>>(declaration, environment, isInitializer);
 }
@@ -59,12 +62,12 @@ int IcarusFunction<R>::arity() {
 
 template <typename R>
 std::any IcarusFunction<R>::call(Interpreter* interpreter, std::vector<std::any> arguments) {
-    Environment* environment = new Environment(this->closure);
+    std::shared_ptr<Environment> environment = std::make_shared<Environment>(this->closure);
     for (int i = 0; i < this->declaration->params.size(); i++) {
         environment->define(this->declaration->params[i]->getLexeme(), arguments[i]);
     }
     try {
-        interpreter->executeBlock(this->declaration->body, environment);
+        interpreter->executeBlock(this->declaration->body, environment->getSharedPtr());
     } catch (StackUnwinder* returnValue) {
         return returnValue->value;
     }

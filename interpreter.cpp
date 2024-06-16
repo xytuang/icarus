@@ -19,7 +19,7 @@
 #include "icarus_instance.h"
 
 Interpreter::Interpreter() {
-    this->globals = new Environment();
+    this->globals = std::make_shared<Environment>();
     this->env = globals;
 }
 
@@ -120,15 +120,15 @@ std::string Interpreter::stringify(std::any object) {
         return std::to_string(value);
     }
 
-    else if (object.type() == typeid(IcarusInstance*)){
-        IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
+    else if (object.type() == typeid(std::shared_ptr<IcarusInstance>)){
+        std::shared_ptr<IcarusInstance> instance = std::any_cast<std::shared_ptr<IcarusInstance>>(object);
         return instance->toString();
     }
     return "unsupported";
 }
 
-std::any Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt<std::any>>> statements, Environment* environment) {
-    Environment* previous = this->env;
+std::any Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt<std::any>>> statements, std::shared_ptr<Environment> environment) {
+    std::shared_ptr<Environment> previous = this->env;
     this->env = environment;
 
     for (std::shared_ptr<Stmt<std::any>> statement : statements) {
@@ -156,16 +156,16 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call<std::any>> expr) {
     for (int i = 0; i < expr->arguments.size(); i++) {
         arguments.push_back(evaluate(expr->arguments[i]));
     }
-    IcarusCallable* callObject;
+    std::shared_ptr<IcarusCallable> callObject;
 
-    if (callee.type() == typeid(IcarusFunction<std::any>*)) {
-        IcarusFunction<std::any>* functionPtr = std::any_cast<IcarusFunction<std::any>*>(callee);
-        callObject = dynamic_cast<IcarusCallable*>(functionPtr);
+    if (callee.type() == typeid(std::shared_ptr<IcarusFunction<std::any>>)) {
+        std::shared_ptr<IcarusFunction<std::any>> functionPtr = std::any_cast<std::shared_ptr<IcarusFunction<std::any>>>(callee);
+        callObject = dynamic_pointer_cast<IcarusCallable>(functionPtr);
     }
     
-    else if (callee.type() == typeid(IcarusClass*)) {
-        IcarusClass* classPtr = std::any_cast<IcarusClass*>(callee);
-        callObject = dynamic_cast<IcarusCallable*>(classPtr);
+    else if (callee.type() == typeid(std::shared_ptr<IcarusClass>)) {
+        std::shared_ptr<IcarusClass> classPtr = std::any_cast<std::shared_ptr<IcarusClass>>(callee);
+        callObject = dynamic_pointer_cast<IcarusCallable>(classPtr);
     }
     else {
         throw new RuntimeError(expr->paren, "Can only call functions and classes");
@@ -178,8 +178,8 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call<std::any>> expr) {
 
 std::any Interpreter::visitGetExpr(std::shared_ptr<Get<std::any>> expr) {
     std::any object = evaluate(expr->object);
-    if (object.type() == typeid(IcarusInstance*)) {
-        IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
+    if (object.type() == typeid(std::shared_ptr<IcarusInstance>)) {
+        std::shared_ptr<IcarusInstance> instance = std::any_cast<std::shared_ptr<IcarusInstance>>(object);
         return instance->get(expr->name);
     }
     throw new RuntimeError(expr->name, "Only instances have properties");
@@ -292,11 +292,11 @@ std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical<std::any>> expr) 
 std::any Interpreter::visitSetExpr(std::shared_ptr<Set<std::any>> expr) {
     std::any object = evaluate(expr->object);
 
-    if (object.type() != typeid(IcarusInstance*)) {
+    if (object.type() != typeid(std::shared_ptr<IcarusInstance>)) {
         throw new RuntimeError(expr->name, "Only instances have fields");
     }
     std::any value = evaluate(expr->value);
-    IcarusInstance* instance = std::any_cast<IcarusInstance*>(object);
+    std::shared_ptr<IcarusInstance> instance = std::any_cast<std::shared_ptr<IcarusInstance>>(object);
     instance->set(expr->name, value);
     return value;
 
@@ -330,7 +330,7 @@ std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable<std::any>> expr
 //STATEMENTS
 
 std::any Interpreter::visitBlockStmt(std::shared_ptr<Block<std::any>> stmt) {
-    executeBlock(stmt->statements, new Environment(this->env));
+    executeBlock(stmt->statements, std::make_shared<Environment>(this->env));
     return nullptr;
 }
 

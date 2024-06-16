@@ -15,8 +15,6 @@ Resolver::Resolver(Interpreter* interpreter) {
     this->interpreter = interpreter;
 }
 
-
-
 void Resolver::resolve(std::shared_ptr<Expr<std::any>> expr) {
     expr->accept(this);
 }
@@ -36,7 +34,6 @@ void Resolver::declare(std::shared_ptr<Token> name) {
     if (this->scopes.size() == 0) {
         return;
     }
-    std::cout << "From declare: " << name->getLexeme() << std::endl;
     unordered_map<std::string, bool> scope = this->scopes.back();
     if (scope.find(name->getLexeme()) != scope.end()) {
         Icarus::error(name, "Already a variable with this name in this scope");
@@ -46,7 +43,6 @@ void Resolver::declare(std::shared_ptr<Token> name) {
 }
 
 void Resolver::define(std::shared_ptr<Token> name) {
-    std::cout << name->getLexeme() << std::endl;
     if (this->scopes.size() == 0) {
         return;
     }
@@ -179,15 +175,7 @@ std::any Resolver::visitAssignExpr(std::shared_ptr<Assign<std::any>> expr) {
 }
 
 std::any Resolver::visitVariableExpr(std::shared_ptr<Variable<std::any>> expr) {
-    int currScope = 0;
-    for (auto mp : this->scopes) {
-        std::cout << "Scope: " << currScope << std::endl;
-        for (auto it : mp) {
-            std::cout << "ID: " << it.first << " Value: " << it.second << std::endl;
-        }
-        currScope++;
-    }
-    if (!(this->scopes.empty()) && this->scopes.back()[expr->name->getLexeme()] == false) {
+    if (this->scopes.size() != 0  && this->scopes.back()[expr->name->getLexeme()] == false) {
         Icarus::error(expr->name, "Can't read local variable in its own initializer");
     }
     resolveLocal(expr, expr->name);

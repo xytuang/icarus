@@ -26,14 +26,14 @@ class Interpreter : public Expr<std::any>::Visitor<std::any>, public Stmt<std::a
         std::string stringify(std::any object);
 
     public:
-        Environment* env;
-        Environment* globals;
+        std::shared_ptr<Environment> env;
+        std::shared_ptr<Environment> globals;
         unordered_map<std::shared_ptr<Expr<std::any>>, int> locals;
 
         Interpreter();
         
         void resolve(std::shared_ptr<Expr<std::any>> expr, int depth);
-        std::any executeBlock(std::vector<std::shared_ptr<Stmt<std::any>>> statements, Environment* environment);
+        std::any executeBlock(std::vector<std::shared_ptr<Stmt<std::any>>> statements, std::shared_ptr<Environment> environment);
 
         std::any visitBlockStmt(std::shared_ptr<Block<std::any>> stmt);
 

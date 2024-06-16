@@ -10,16 +10,16 @@
 #include "token.h"
 #include "runtime_error.h"
 
-class Environment {
+class Environment : public enable_shared_from_this<Environment> {
     private:
         unordered_map<std::string, std::any> values;
     public:
-        Environment* enclosing;
+        std::shared_ptr<Environment> enclosing;
         Environment(){
             enclosing = nullptr;
         }
 
-        Environment(Environment* enclosing){
+        Environment(std::shared_ptr<Environment> enclosing){
             this->enclosing = enclosing;
         }
 
@@ -38,8 +38,8 @@ class Environment {
         }
 
         // part of resolution
-        Environment* ancestor(int distance) {
-            Environment* env = this;
+        std::shared_ptr<Environment> ancestor(int distance) {
+            std::shared_ptr<Environment> env = getSharedPtr();
             for (int i = 0; i < distance; i++) {
                 env = env->enclosing;
             }
@@ -69,6 +69,10 @@ class Environment {
             }
             throw new RuntimeError(name, "Undefined variable: " + name->getLexeme() + ".");
 
+        }
+
+        std::shared_ptr<Environment> getSharedPtr() {
+            return this->shared_from_this();
         }
 
 };

@@ -1,7 +1,7 @@
 print "hi" or 2;
 print nil or "yes";
-
-if (false)
+var condition = true;
+if (condition)
     print "true";
 else
     print "false";

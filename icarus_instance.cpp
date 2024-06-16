@@ -14,18 +14,28 @@ IcarusInstance::IcarusInstance(std::shared_ptr<IcarusClass> klass) {
 }
 
 std::string IcarusInstance::toString() {
-    return this->klass->name + " instance";
+    if (auto klass_ptr = klass.lock()) {
+        return klass_ptr->name + " instance";
+    }
+    else {
+        return "Missing class";
+    }
 }
 
 std::any IcarusInstance::get(std::shared_ptr<Token> name) {
     if (this->fields.find(name->getLexeme()) != this->fields.end()) {
         return this->fields[name->getLexeme()];
     }
-    std::shared_ptr<IcarusFunction<std::any>> method = this->klass->findMethod(name->getLexeme());
-    if (method != nullptr) {
-        return method->bind(getSharedPtr());
+    if (auto klass_ptr = klass.lock()) {
+        std::shared_ptr<IcarusFunction<std::any>> method = klass_ptr->findMethod(name->getLexeme());
+        if (method != nullptr) {
+            return method->bind(getSharedPtr());
+        }
+        throw new RuntimeError(name, "Undefined property: " + name->getLexeme() + ".");
     }
-    throw new RuntimeError(name, "Undefined property: " + name->getLexeme() + ".");
+    else {
+        return "Missing class";
+    }
 }
 
 void IcarusInstance::set(std::shared_ptr<Token> name, std::any value) {
@@ -35,3 +45,4 @@ void IcarusInstance::set(std::shared_ptr<Token> name, std::any value) {
 std::shared_ptr<IcarusInstance> IcarusInstance::getSharedPtr() {
     return this->shared_from_this();
 }
+
