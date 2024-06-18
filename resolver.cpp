@@ -13,7 +13,6 @@
 Resolver::Resolver(Interpreter* interpreter) {
     this->interpreter = interpreter;
 }
-
 void Resolver::resolve(Stmt<std::any>* stmt) {
     stmt->accept(this);
 }
@@ -114,13 +113,13 @@ std::any Resolver::visitFunctionStmt(Function<std::any>* stmt) {
 }
 
 //Expression statements
-std::any visitExpressionStmt(Expression<std::any>* stmt) {
+std::any Resolver::visitExpressionStmt(Expression<std::any>* stmt) {
     resolve(stmt->expression);
     return nullptr;
 }
 
 //If statements
-std::any visitIfStmt(If<std::any>* stmt) {
+std::any Resolver::visitIfStmt(If<std::any>* stmt) {
     resolve(stmt->condition);
     resolve(stmt->thenBranch);
     if (stmt->elseBranch) resolve(stmt->elseBranch);
@@ -128,13 +127,13 @@ std::any visitIfStmt(If<std::any>* stmt) {
 }
 
 //Print statements
-std::any visitPrintStmt(Print<std::any>* stmt) {
+std::any Resolver::visitPrintStmt(Print<std::any>* stmt) {
     resolve(stmt->expression);
     return nullptr;
 }
 
 //Return statements
-std::any visitReturnStmt(Return<std::any>* stmt) {
+std::any Resolver::visitReturnStmt(Return<std::any>* stmt) {
     if (stmt->value) {
         resolve(stmt->value);
     }
@@ -142,21 +141,21 @@ std::any visitReturnStmt(Return<std::any>* stmt) {
 }
 
 //While statements
-std::any visitWhileStmt(While<std::any>* stmt) {
+std::any Resolver::visitWhileStmt(While<std::any>* stmt) {
     resolve(stmt->condition);
     resolve(stmt->body);
     return nullptr;
 }
 
 //Binary expressions
-std::any visitBinaryExpr(Binary<std::any>* expr) {
+std::any Resolver::visitBinaryExpr(Binary<std::any>* expr) {
     resolve(expr->left);
     resolve(expr->right);
     return nullptr;
 }
 
 //Call expressions
-std::any visitCallExpr(Call<std::any>* expr) {
+std::any Resolver::visitCallExpr(Call<std::any>* expr) {
     resolve(expr->callee);
     for (Expr<std::any>* argument : expr->arguments) {
         resolve(argument);
@@ -165,26 +164,26 @@ std::any visitCallExpr(Call<std::any>* expr) {
 }
 
 //Grouping expressions
-std::any visitGroupingExpr(Grouping<std::any>* expr) {
+std::any Resolver::visitGroupingExpr(Grouping<std::any>* expr) {
     resolve(expr->expression);
     return nullptr;
 }
 
 //Literals
-std::any visitLiteralExpr(Literal<std::any>* expr) {
+std::any Resolver::visitLiteralExpr(Literal<std::any>* expr) {
     return nullptr;
 }
 
 
 //Logical expressions
-std::any visitLogicalExpr(Logical<std::any>* expr) {
+std::any Resolver::visitLogicalExpr(Logical<std::any>* expr) {
     resolve(expr->left);
     resolve(expr->right);
     return nullptr;
 }
 
 //Unary expressions
-std::any visitUnaryExpr(Unary<std::any>* expr) {
+std::any Resolver::visitUnaryExpr(Unary<std::any>* expr) {
     resolve(expr->right);
     return nullptr;
 }

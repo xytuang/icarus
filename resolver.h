@@ -19,7 +19,6 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
 
         void resolve(Stmt<std::any>* stmt);
         void resolve(Expr<std::any>* expr);
-        void resolve(std::vector<Stmt<std::any>*> stmts);
         void resolveFunction(Function<std::any>* function);
 
         void beginScope(); 
@@ -31,6 +30,8 @@ class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>
 
     public:
         Resolver(Interpreter* interpreter);
+
+        void resolve(std::vector<Stmt<std::any>*> stmts);
 
         std::any visitBlockStmt(Block<std::any>* stmt);
 

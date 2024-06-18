@@ -25,6 +25,18 @@ class Environment {
             values[name] = value;
         }
 
+        Environment* ancestor(int distance) {
+            Environment* env = this;
+            for (int i = 0; i < distance; i++) {
+                env = env->enclosing;
+            }
+            return env;
+        }
+
+        std::any getAt(int distance, std::string name) {
+            return ancestor(distance)->values[name];
+        }
+
         std::any get(Token* name) {
             if (values.find(name->getLexeme()) != values.end()) {
                 return values[name->getLexeme()];
@@ -33,6 +45,10 @@ class Environment {
                 return enclosing->get(name);
             }
             throw new RuntimeError(name, "Undefined variable: " + name->getLexeme() + ".");
+        }
+
+        void assignAt(int distance, Token* name, std::any value) {
+            ancestor(distance)->values[name->getLexeme()] = value;
         }
 
         void assign(Token* name, std::any value) {

@@ -28,6 +28,20 @@ std::any Interpreter::execute(Stmt<std::any>* stmt) {
     return nullptr;
 }
 
+void Interpreter::resolve(Expr<std::any>* expr, int depth) {
+    locals[expr] = depth;
+}
+
+std::any Interpreter::lookUpVariable(Token* name, Expr<std::any>* expr) {
+    if (locals.find(expr) != locals.end()) {
+        int distance = locals[expr];
+        return env->getAt(distance, name->getLexeme());
+    }
+    else {
+        return globals->get(name);
+    }
+    
+}
 
 bool Interpreter::isEqual(std::any a, std::any b) {
     if (a.type() == typeid(std::nullptr_t) && b.type() == typeid(std::nullptr_t)) {
@@ -117,12 +131,21 @@ std::any Interpreter::executeBlock(std::vector<Stmt<std::any>*> statements, Envi
     return nullptr;
 }
 
+
+//Assign expressions
 std::any Interpreter::visitAssignExpr(Assign<std::any>* expr) {
     std::any value = evaluate(expr->value);
-    this->env->assign(expr->name, value);
+    if (locals.find(expr) != locals.end()) {
+        int distance = locals[expr];
+        env->assignAt(distance, expr->name, value);
+    }
+    else {
+        globals->assign(expr->name, value);
+    }
     return value;
 }
 
+//Call expressions
 std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
     std::any callee = evaluate(expr->callee);
     std::vector<std::any> arguments;
@@ -145,6 +168,8 @@ std::any Interpreter::visitCallExpr(Call<std::any>* expr) {
     return function->call(this, arguments);
 }
 
+
+//Binary Expressions
 std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
     std::any left = evaluate(expr->left);
     std::any right = evaluate(expr->right);
@@ -226,15 +251,18 @@ std::any Interpreter::visitBinaryExpr(Binary<std::any>* expr){
 }
 
 
-
+//Grouping expressions
 std::any Interpreter::visitGroupingExpr(Grouping<std::any>* expr){
     return evaluate(expr->expression);
 }
 
+
+//Literal expressions
 std::any Interpreter::visitLiteralExpr(Literal<std::any>* expr){
     return expr->value;
 }
 
+//Logical Expressions
 std::any Interpreter::visitLogicalExpr(Logical<std::any>* expr) {
     std::any left = evaluate(expr->left);
     if (expr->operation->getType() == OR) {
@@ -250,6 +278,8 @@ std::any Interpreter::visitLogicalExpr(Logical<std::any>* expr) {
     return evaluate(expr->right);
 }
 
+
+//Unary expressions
 std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
     std::any right = evaluate(expr->right);
     switch(expr->operation->getType()) {
@@ -266,9 +296,9 @@ std::any Interpreter::visitUnaryExpr(Unary<std::any>* expr){
     return nullptr;
 }
 
-
+//variable expressions
 std::any Interpreter::visitVariableExpr(Variable<std::any>* expr) {
-    return this->env->get(expr->name);
+    return lookUpVariable(expr->name, expr);
 }
 
 //STATEMENTS
@@ -278,18 +308,21 @@ std::any Interpreter::visitBlockStmt(Block<std::any>* stmt) {
     return nullptr;
 }
 
+
+//expression statements
 std::any Interpreter::visitExpressionStmt(Expression<std::any>* stmt) {
     evaluate(stmt->expression);
     return nullptr;
 }
 
-
+//function statements
 std::any Interpreter::visitFunctionStmt(Function<std::any>* stmt) {
     IcarusFunction<std::any>* function = new IcarusFunction<std::any>(stmt, this->env);
     this->env->define(stmt->name->getLexeme(), function);
     return nullptr;
 }
 
+//if statements
 std::any Interpreter::visitIfStmt(If<std::any>* stmt) {
     if (isTruthy(evaluate(stmt->condition))) {
         execute(stmt->thenBranch);
@@ -300,12 +333,14 @@ std::any Interpreter::visitIfStmt(If<std::any>* stmt) {
     return nullptr;
 }
 
+//Print statements
 std::any Interpreter::visitPrintStmt(Print<std::any>* stmt) {
     std::any value = evaluate(stmt->expression);
     std::cout << stringify(value) << std::endl;
     return nullptr;
 }
 
+//Return statements
 std::any Interpreter::visitReturnStmt(Return<std::any>* stmt) {
     std::any value = nullptr;
     if (stmt->value != nullptr) {
@@ -314,6 +349,7 @@ std::any Interpreter::visitReturnStmt(Return<std::any>* stmt) {
     throw new StackUnwinder(value);
 }
 
+//Var statements
 std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
     std::any value = nullptr;
     if (stmt->initializer != nullptr) {
@@ -323,12 +359,15 @@ std::any Interpreter::visitVarStmt(Var<std::any>* stmt) {
     return nullptr;
 }
 
+//While statements
 std::any Interpreter::visitWhileStmt(While<std::any>* stmt) {
     while (isTruthy(evaluate(stmt->condition))) {
         execute(stmt->body);
     }
     return nullptr;
 }
+
+//interprete statements
 std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
     try {
         for (Stmt<std::any>* stmt : statements) {
