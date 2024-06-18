@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <any>
 #include <string>
+#include <iostream>
 
 #include "expr.h"
 #include "stmt.h"
@@ -38,7 +39,7 @@ void Resolver::resolveFunction(Function<std::any>* function) {
 }
 
 void Resolver::beginScope() {
-    unordered_map<std::string, bool> temp;
+    unordered_map<std::string, bool>* temp = new unordered_map<std::string, bool>();
     scopes.push_back(temp);
 }
 
@@ -47,21 +48,20 @@ void Resolver::endScope() {
 }
 
 void Resolver::declare(Token* name) {
-    if (scopes.size() == 0) return;
-    unordered_map<std::string, bool> scope = scopes[scopes.size() - 1];
-    scope[name->getLexeme()] = false;
+    if (scopes.size() == 0) {
+       return; 
+    }
+    scopes.back()->insert({name->getLexeme(), false});
 }
 
 void Resolver::define(Token* name) {
-
     if (scopes.size() == 0) return;
-    unordered_map<std::string, bool> scope = scopes[scopes.size() - 1];
-    scope[name->getLexeme()] = true;
+    scopes.back()->at(name->getLexeme()) = true;
 }
 
 void Resolver::resolveLocal(Expr<std::any>* expr, Token* name) {
     for (int i = scopes.size() - 1; i >= 0; i--) {
-        if ((scopes[i].find(name->getLexeme()) != scopes[i].end())) {
+        if ((scopes[i]->find(name->getLexeme()) != scopes[i]->end())) {
             interpreter->resolve(expr, scopes.size() - 1 - i);
             return;
         }
@@ -90,7 +90,15 @@ std::any Resolver::visitVarStmt(Var<std::any>* stmt) {
 
 //Variable expressions
 std::any Resolver::visitVariableExpr(Variable<std::any>* expr) {
-    if (!scopes.empty() && (scopes[scopes.size() - 1][expr->name->getLexeme()] == false)) {
+    bool found = false;
+    std::string name = expr->name->getLexeme();
+    for (auto pr : *scopes.back()) {
+        if (pr.first == name && pr.second == true) {
+            found = true;
+        }
+    }
+
+    if (!scopes.empty() && !found) {
         Icarus::error(expr->name, "Can't read local variable in its own initializer");
     }
     resolveLocal(expr, expr->name);

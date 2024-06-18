@@ -15,7 +15,7 @@
 class Resolver : public Expr<std::any>::Visitor<std::any>, public Stmt<std::any>::Visitor<std::any> {
     private:
         Interpreter* interpreter;
-        std::vector<unordered_map<std::string, bool>> scopes;
+        std::vector<unordered_map<std::string, bool>*> scopes;
 
         void resolve(Stmt<std::any>* stmt);
         void resolve(Expr<std::any>* expr);
