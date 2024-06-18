@@ -92,12 +92,14 @@ std::any Resolver::visitVarStmt(Var<std::any>* stmt) {
 std::any Resolver::visitVariableExpr(Variable<std::any>* expr) {
     bool found = false;
     std::string name = expr->name->getLexeme();
-    for (auto pr : *scopes.back()) {
-        if (pr.first == name && pr.second == true) {
-            found = true;
+
+    for (int i = scopes.size() - 1; i >= 0; i--) {
+        for (auto pr : *scopes[i]) {
+            if (pr.first == name) {
+                found = true;
+            }
         }
     }
-
     if (!scopes.empty() && !found) {
         Icarus::error(expr->name, "Can't read local variable in its own initializer");
     }
