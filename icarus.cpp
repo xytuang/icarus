@@ -11,6 +11,7 @@
 #include "token.h"
 #include "parser.h"
 #include "resolver.h"
+#include "cleaner.h"
 #include "runtime_error.h"
 #include "stmt.h"
 
@@ -33,6 +34,19 @@ void Icarus::run(std::string source){
     Resolver* resolver = new Resolver(interpreter);
     resolver->resolve(statements);
     interpreter->interpret(statements);
+    
+    Cleaner* cleaner = new Cleaner();
+    
+    cleaner->clean(statements);
+
+    scanner->clean();
+
+    parser->clean();
+
+    delete parser;
+    delete resolver;
+    delete interpreter;
+    delete cleaner;
 
 }
 

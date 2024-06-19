@@ -169,3 +169,9 @@ std::vector<Token *> Scanner::scanTokens() {
     this->tokens.push_back(new Token(END_OF_FILE, "", nullptr, line));
     return this->tokens;
 }
+
+void Scanner::clean() {
+    for (auto token : tokens) {
+        delete token;
+    }
+}

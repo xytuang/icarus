@@ -14,12 +14,16 @@
 template <typename R>
 class Parser {
     public:
+
+        std::vector<Stmt<R>*> statements;
         class ParseError : public std::exception {};
         Parser<R>(std::vector<Token*> tokens);
         std::vector<Stmt<R>*> parse();
+        void clean();
 
     private:
         std::vector<Token *> tokens;
+
         int current;
 
         bool isAtEnd();
@@ -491,6 +495,14 @@ std::vector<Stmt<R>*> Parser<R>::parse() {
     while(!isAtEnd()){
         statements.push_back(declaration());
     }
+    this->statements = statements;
     return statements;
+}
+
+template <typename R>
+void Parser<R>::clean() {
+    for (auto token : tokens) {
+        delete token;
+    }
 }
 #endif

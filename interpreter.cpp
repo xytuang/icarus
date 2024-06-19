@@ -367,7 +367,7 @@ std::any Interpreter::visitWhileStmt(While<std::any>* stmt) {
     return nullptr;
 }
 
-//interprete statements
+//interpret statements
 std::any Interpreter::interpret(std::vector<Stmt<std::any>*> statements) {
     try {
         for (Stmt<std::any>* stmt : statements) {

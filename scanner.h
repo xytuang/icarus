@@ -50,5 +50,7 @@ class Scanner {
         Scanner(std::string source);
 
         std::vector<Token *> scanTokens();
+
+        void clean();
 };
 #endif

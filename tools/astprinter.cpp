@@ -7,10 +7,9 @@
 
 class AstPrinter : public Expr<std::string>::Visitor<std::string> {
     private:
-        std::string parenthesize(std::string name, std::initializer_list<Expr<std::string>*> exprs) {
+        std::string parenthesize(std::string name, vector<Expr<std::string>*> vec) {
             std::string result = "(";
             result += name;
-            std::vector<Expr<std::string>*> vec(exprs);
             for (int i = 0; i < vec.size(); i++) {
                 result += " ";
                 result += vec[i]->accept(this);
@@ -23,11 +22,17 @@ class AstPrinter : public Expr<std::string>::Visitor<std::string> {
             return expr->accept(this);
         }
         std::string visitBinaryExpr(Binary<std::string>* expr) {
-            return parenthesize(expr->operation->getLexeme(), {expr->left, expr->right});
+            std::vector<Expr<std::string>*> vec;
+            vec.push_back(expr->left);
+            vec.push_back(expr->right);
+            return parenthesize(expr->operation->getLexeme(), vec);
         }
 
         std::string visitGroupingExpr(Grouping<std::string>* expr) {
-            return parenthesize("group", {expr->expression});
+
+            std::vector<Expr<std::string>*> vec;
+            vec.push_back(expr->expression);
+            return parenthesize("group", vec);
         }
 
         std::string visitLiteralExpr(Literal<std::string>* expr) {
@@ -51,18 +56,37 @@ class AstPrinter : public Expr<std::string>::Visitor<std::string> {
                 }
             }
             return "nil";
-            /*
-            try {
-                return std::any_cast<std::string>(expr->value); 
-            } catch(const std::bad_any_cast&) {
-                return "nil";
-            }
-            */
-
         }
 
         std::string visitUnaryExpr(Unary<std::string>* expr) {
-            return parenthesize(expr->operation->getLexeme(), {expr->right});
+            std::vector<Expr<std::string>*> vec;
+            vec.push_back(expr->right);
+            return parenthesize(expr->operation->getLexeme(), vec);
+        }
+
+        std::string visitAssignExpr(Assign<std::string>* expr) {
+
+            std::vector<Expr<std::string>*> vec;
+            vec.push_back(expr->value);
+            return parenthesize(expr->name->getLexeme() + "=", vec);
+        }
+
+
+        std::string visitCallExpr(Call<std::string>* expr) {
+            return parenthesize("call", expr->arguments);
+        }
+
+
+        std::string visitLogicalExpr(Logical<std::string>* expr) {
+            std::vector<Expr<std::string>*> vec;
+            vec.push_back(expr->left);
+            vec.push_back(expr->right);
+            return parenthesize(expr->operation->getLexeme(), vec);
+        }
+
+        std::string visitVariableExpr(Variable<std::string>* expr) {
+            std::vector<Expr<std::string>*> vec;
+            return parenthesize("Variable: " + expr->name->getLexeme(), vec);
         }
 };
 
